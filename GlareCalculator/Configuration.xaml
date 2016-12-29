@@ -1,0 +1,34 @@
+﻿<Window x:Class="GlareCalculator.Configuration"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="修改配置" Height="200" Width="300">
+    <Grid>
+        <StackPanel>
+        <StackPanel Margin="1,5,0,0" Orientation="Horizontal">
+            <Label>相机类型：</Label>
+            <ComboBox>
+                <ComboBoxItem IsSelected="True">5.5um</ComboBoxItem>
+                    <ComboBoxItem>2.2um</ComboBoxItem>
+            </ComboBox>
+        </StackPanel>
+        <StackPanel Margin="1,5,0,0" Orientation="Horizontal">
+            <Label>镜头类型：</Label>
+            <ComboBox>
+                <ComboBoxItem IsSelected="True">8mm</ComboBoxItem>
+                <ComboBoxItem>6mm</ComboBoxItem>
+            </ComboBox>
+            
+        </StackPanel>
+            <Grid Margin="0,5,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Name="btnCancel" Margin="0,0,0,0" Grid.Column="1" Click="btnCancel_Click">Cancel</Button>
+                <Button Name="btnOk" Margin="2,0,0,0" Grid.Column="2" HorizontalAlignment="Left" Width="95" Click="btnOk_Click" >Ok</Button>
+            </Grid>
+          
+        </StackPanel>
+    </Grid>
+</Window>

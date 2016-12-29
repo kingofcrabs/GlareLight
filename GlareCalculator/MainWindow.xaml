@@ -1,0 +1,144 @@
+﻿<Window x:Class="GlareCalculator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:GlareCalculator"
+        Title="GlareCalculator" Height="600" Width="1000">
+    <Window.Resources>
+        <RoutedUICommand x:Key="DeleteLastPoint" Text="Delete Last Point." />
+        <RoutedUICommand x:Key="CompletePolygon" Text="Finish Editing the polygon." />
+    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Ctrl" Key="D" Command="{StaticResource DeleteLastPoint}"/>
+        <KeyBinding Modifiers="Ctrl" Key="P" Command="{StaticResource CompletePolygon}"/>
+    </Window.InputBindings>
+    <Window.CommandBindings>
+        <CommandBinding Command="{StaticResource DeleteLastPoint}"
+                    CanExecute="DeleteLastPoint_CanExecute"
+                    Executed="DeleteLastPoint_Executed"/>
+
+        <CommandBinding Command="{StaticResource CompletePolygon}"
+                    CanExecute="CompletePolygon_CanExecute"
+                    Executed="CompletePolygon_Executed"/>
+
+        <CommandBinding Command="Help" Executed="CommandHelp_Executed" CanExecute="CommandHelp_CanExecute"/>
+    </Window.CommandBindings>
+   
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="3*"/>  
+            
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="110"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Column="0">
+            
+        </Grid>
+        <DockPanel Grid.ColumnSpan="2">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="文件">
+                    <MenuItem Command="Open" />
+                    <Separator />
+                    <MenuItem Header="打开" />
+                </MenuItem>
+                <MenuItem Header="帮助">
+                    <MenuItem Command="Help" />
+                </MenuItem>
+            </Menu>
+        </DockPanel>
+        <StackPanel HorizontalAlignment="Right" Grid.Column="1" Grid.Row="1">
+           
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="1">
+            
+
+            <Button Name="btnOpen" Click="btnOpen_Click"  ToolTip="打开定义文件.">
+                <StackPanel Orientation="Vertical" >
+                    <Image Source="/Images/open.jpg"  Height="55"/>
+                    <TextBlock FontSize="16" TextAlignment="Center" Margin="3,0,0,0">打开</TextBlock>
+                </StackPanel>
+            </Button>
+            <Button Name="btnSave" Click="btnSave_Click" ToolTip="保持到文件.">
+                <StackPanel Orientation="Vertical" >
+                    <Image Source="/Images/save.jpg"  Height="55"/>
+                    <TextBlock FontSize="16" TextAlignment="Center" Margin="3,0,0,0">保存</TextBlock>
+                </StackPanel>
+            </Button>
+            <Button Name="btnConfig" Click="btnConfig_Click" ToolTip="配置.">
+                <StackPanel Orientation="Vertical" >
+                    <Image Source="/Images/config.png"  Height="55"/>
+                    <TextBlock FontSize="16" TextAlignment="Center" Margin="3,0,0,0">配置</TextBlock>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+
+
+       
+        <StackPanel Name="operations" Grid.Row="2">
+            <Label>操作：</Label>
+            <WrapPanel Name="grpShape">
+                <ToggleButton Width="64">
+                    <Image  Source="/Images/polygon.png"/>
+                </ToggleButton>
+                <ToggleButton Width="64">
+                    <Image  Source="/Images/circle.png"/>
+                </ToggleButton>
+                <ToggleButton Width="64">
+                    <Image  Source="/Images/move.png"/>
+                </ToggleButton>
+                <ToggleButton Width="64">
+                    <Image  Source="/Images/selection.png"/>
+                </ToggleButton>
+            </WrapPanel>
+            <Label>添加删除：</Label>
+            <StackPanel Orientation="Horizontal">
+                <Button Name="btnAdd" Width="64" Content="Add" Click="btnAdd_Click"></Button>
+                <Button  Name="btnDelete"  Width="64" Click="btnDelete_Click" Content="Delete" ></Button>
+            </StackPanel>
+           
+
+            <Grid Name="resultGrid" Margin="0,5,0,0">
+                <ListView Name="lstviewResult"  FontFamily="SimSun">
+                    <ListView.View>
+                        <GridView x:Name="gridView1">
+                            <GridViewColumn Header="ID" Width="30" DisplayMemberBinding="{Binding Path=ID}"></GridViewColumn>
+                            <GridViewColumn Header="La" Width="60" DisplayMemberBinding="{Binding Path=La}"></GridViewColumn>
+                            <GridViewColumn Header="ω"  Width="60" DisplayMemberBinding="{Binding Path=Omega}"></GridViewColumn>
+                            <GridViewColumn Header="P"  Width="60" DisplayMemberBinding="{Binding Path=P}"></GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </Grid>
+            
+        </StackPanel>
+        
+        <StackPanel Name="infoStackPanel" Grid.Row="3" >
+            <Label>信息：</Label>
+            <TextBox Name="txtInfo" MinHeight="80" TextWrapping="Wrap"></TextBox>
+        </StackPanel>
+        <Grid Grid.Row="1" Grid.Column="1" Grid.RowSpan="3" >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="5*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+            
+            <Grid Name="ImgContainer" Grid.Row="1" Grid.RowSpan="2">
+                <ScrollViewer x:Name="scrollViewer" VerticalScrollBarVisibility="Visible"
+                   HorizontalScrollBarVisibility="Visible"  >
+                    <local:MyCanvas x:Name="myCanvas" Width="1362" Height="581" >
+                    </local:MyCanvas>
+
+                </ScrollViewer>
+            </Grid>
+            </Grid>
+        </Grid>
+        
+    </Grid>
+    
+</Window>
