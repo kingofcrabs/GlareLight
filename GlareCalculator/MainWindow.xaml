@@ -35,9 +35,24 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="110"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Column="0">
-            
-        </Grid>
+        <Grid.Resources>
+            <Style x:Key="ToggleButtonStyle1" TargetType="{x:Type ToggleButton}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                            <Border HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="border" Padding="5,5,5,5" CornerRadius="5,5,5,5" Background="#FFBFACAC" BorderBrush="#FF000000" BorderThickness="1,1,1,1" SnapsToDevicePixels="True">
+                                <ContentPresenter x:Name="contentPresenter"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="true">
+                                    <Setter Property="Background" TargetName="border" Value="#FF39C310"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
         <DockPanel Grid.ColumnSpan="2">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="文件">
@@ -81,16 +96,16 @@
         <StackPanel Name="operations" Grid.Row="2">
             <Label>操作：</Label>
             <WrapPanel Name="grpShape">
-                <ToggleButton Width="64">
+                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnPolygon_Click" Name="btnPolygon" Width="64">
                     <Image  Source="/Images/polygon.png"/>
                 </ToggleButton>
-                <ToggleButton Width="64">
+                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnCircle_Click" Name="btnCircle" Width="64">
                     <Image  Source="/Images/circle.png"/>
                 </ToggleButton>
-                <ToggleButton Width="64">
+                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnMove_Click"  Name="btnMove" Width="64">
                     <Image  Source="/Images/move.png"/>
                 </ToggleButton>
-                <ToggleButton Width="64">
+                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnSelect_Click" Name="btnSelect" Width="64">
                     <Image  Source="/Images/selection.png"/>
                 </ToggleButton>
             </WrapPanel>

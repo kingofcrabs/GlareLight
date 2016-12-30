@@ -64,6 +64,8 @@ namespace GlareCalculator
        
         internal void LeftMouseUp(Point pt) //add pt to polygon
         {
+            if (tempPolygon.Finished)
+                return;
             tempPolygon.pts.Add(pt);
             tempPolygon.currentPt = pt;
             InvalidateVisual();
@@ -79,7 +81,7 @@ namespace GlareCalculator
                 throw new Exception("多边形顶点必须大于等于3！");
             if (!tempPolygon.Finished)
                 throw new Exception("未添加完成！");
-
+            tempPolygon.currentPt = invalidPt;
             polygons.Add(tempPolygon);
             tempPolygon = new Polygon();
             polygons.ForEach(x => x.Selected = false);
@@ -146,11 +148,31 @@ namespace GlareCalculator
             if (onPolygonChanged != null)
                 onPolygonChanged(polygons);
         }
+
+
+
+        internal void LeftMouseMove(Point pt, Operation operation)
+        {
+            switch(operation)
+            {
+                case Operation.polygon:
+                    if(!tempPolygon.Finished)
+                    {
+                        tempPolygon.currentPt = pt;
+                        InvalidateVisual();
+                    }
+                    break;
+                default:
+                    break;
+                //    throw new NotImplementedException();
+            }
+        }
     }
 
     interface IShape
     {
         void Render(DrawingContext drawingContext, bool shouldBlow);
+        bool Selected { get; set; }
     }
     public class Polygon : IShape
     {
@@ -163,7 +185,7 @@ namespace GlareCalculator
         {
             pts = new List<Point>();
             currentPt = invalidPt;
-            Selected = false;
+            Selected = true;
         }
 
         public void RemoveLast()
@@ -192,14 +214,15 @@ namespace GlareCalculator
 
         public void Render(DrawingContext drawingContext, bool shouldBlow)
         {
-            if(currentPt != invalidPt)
+            if (pts.Count > 0 && Selected)
             {
                 int radius = shouldBlow ? 3 : 1;
-                drawingContext.DrawEllipse(null, new Pen(Brushes.Red, 2), currentPt, radius, radius);
+                drawingContext.DrawEllipse(null, new Pen(Brushes.Red, 2), pts.Last(), radius, radius);
             }
             
 
-            Brush brush = Selected ? Brushes.Red : Brushes.Blue;
+            Brush brush = Brushes.Blue;
+            int width = Selected ? 2 : 1;
             for (int i = 0; i < pts.Count; i++)
             {
                 Point ptStart;
@@ -220,10 +243,20 @@ namespace GlareCalculator
                     ptStart = pts[i];
                     ptEnd = pts[0];
                 }
-                drawingContext.DrawLine(new Pen(brush, 1), ptStart, ptEnd);
+                drawingContext.DrawLine(new Pen(brush, width), ptStart, ptEnd);
             }
             if (currentPt != invalidPt && pts.Count != 0)
-                drawingContext.DrawLine(new Pen(brush, 1), pts.Last(), currentPt);
+                drawingContext.DrawLine(new Pen(brush, width), pts.Last(), currentPt);
         }
     }
+
+
+    enum Operation
+    {
+        none,
+        polygon,
+        circle,
+        move,
+        select
+    };
 }

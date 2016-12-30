@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Forms;
@@ -68,22 +69,22 @@ namespace GlareCalculator
             //myCanvas.SetBkGroundImage();
             myCanvas.IsHitTestVisible = false;
             scrollViewer.PreviewMouseLeftButtonUp += scrollViewer_PreviewMouseLeftButtonUp;
-            //scrollViewer.PreviewMouseMove += ScrollViewer_PreviewMouseMove;
+            scrollViewer.PreviewMouseMove += ScrollViewer_PreviewMouseMove;
   
         }
 
-        //private void ScrollViewer_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
-        //{
-        //    Point pt = e.GetPosition(myCanvas);
-        //    if(Mouse.LeftButton == MouseButtonState.Pressed)
-        //        myCanvas.LeftMouseMove(pt);
-        //}
+        private void ScrollViewer_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            Point pt = e.GetPosition(myCanvas);
+            //if (Mouse.LeftButton == MouseButtonState.Pressed)
+                myCanvas.LeftMouseMove(pt,GetCurrentOperation());
+        }
 
         void scrollViewer_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             Point pt = e.GetPosition(myCanvas);
-            if (Keyboard.IsKeyDown(Key.LeftCtrl))
-                myCanvas.LeftMouseUp(pt);
+            //if (Keyboard.IsKeyDown(Key.LeftCtrl))
+            myCanvas.LeftMouseUp(pt);
         }
 
         private void btnOpen_Click(object sender, RoutedEventArgs e)
@@ -151,6 +152,11 @@ namespace GlareCalculator
         }
 
 
+        //Operation GetCurrentOperation()
+        //{
+
+        //}
+
         #region commands
        
 
@@ -200,5 +206,66 @@ namespace GlareCalculator
         {
 
         }
+
+        #region operations
+
+        private Operation GetCurrentOperation()
+        {
+            var dict = GetToggleOperationDict();
+            foreach(var pair in dict)
+            {
+                if((bool)pair.Value.IsChecked)
+                {
+                    return pair.Key;
+                }
+            }
+            return Operation.none;
+            
+        }
+        Dictionary<Operation, ToggleButton> GetToggleOperationDict()
+        {
+            Dictionary<Operation, ToggleButton> operation_ButtonControl = new Dictionary<Operation, ToggleButton>();
+            operation_ButtonControl.Add(Operation.polygon, btnPolygon);
+            operation_ButtonControl.Add(Operation.circle, btnCircle);
+            operation_ButtonControl.Add(Operation.move, btnMove);
+            operation_ButtonControl.Add(Operation.select, btnSelect);
+            return operation_ButtonControl;
+        }
+        private void OperationToggleButtonPressed(Operation op)
+        {
+
+            var operation_ButtonControl = GetToggleOperationDict();
+            List<Operation> operations = new List<Operation>(){
+                Operation.polygon,Operation.circle,Operation.move,Operation.select
+            };
+            foreach(Operation tmpOp in operations)
+            {
+                if (tmpOp == op)
+                    continue;
+                operation_ButtonControl[tmpOp].IsChecked = false;
+            }
+        }
+
+        private void btnPolygon_Click(object sender, RoutedEventArgs e)
+        {
+            OperationToggleButtonPressed(Operation.polygon);
+        }
+
+        private void btnCircle_Click(object sender, RoutedEventArgs e)
+        {
+            OperationToggleButtonPressed(Operation.circle);
+        }
+
+        private void btnMove_Click(object sender, RoutedEventArgs e)
+        {
+            OperationToggleButtonPressed(Operation.move);
+        }
+
+        private void btnSelect_Click(object sender, RoutedEventArgs e)
+        {
+            OperationToggleButtonPressed(Operation.select);
+        }
+
+        #endregion
     }
 }
