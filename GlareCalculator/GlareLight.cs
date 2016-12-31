@@ -25,7 +25,7 @@ namespace GlareCalculator
                     if (vals[y][x] > max)
                         max = vals[y][x];
                     Point pt = new Point(x, y);
-                    if (polygons.Exists(poly=>IsPointInPolygon(pt,poly.pts)))
+                    if (polygons.Exists(poly=>poly.IsInside(pt)))
                         insidePolygonPts.Add(new Point(x, y));
                 }
             }
@@ -43,32 +43,7 @@ namespace GlareCalculator
             return 8 * Math.Log(0.25 * sum / LA);
         }
 
-        private bool IsPointInPolygon(Point point, List<Point> polygon)
-        {
-            int polygonLineCnt = polygon.Count;
-            int i = 0;
-            bool inside = false;
-            // x, y for tested point.
-            double pointX = point.X;
-            double pointY = point.Y;
-            // start / end point for the current polygon segment.
-            double startX, startY, endX, endY;
-            Point endPoint = polygon[polygonLineCnt - 1];
-            endX = endPoint.X;
-            endY = endPoint.Y;
-            while (i < polygonLineCnt)
-            {
-                startX = endX; startY = endY;
-                endPoint = polygon[i++];
-                endX = endPoint.X; endY = endPoint.Y;
-                //
-                inside ^= (endY > pointY ^ startY > pointY) /* ? pointY inside [startY;endY] segment ? */
-                          && /* if so, test if it is under the segment */
-                          ((pointX - endX) < (pointY - endY) * (startX - endX) / (startY - endY));
-            }
-            return inside;
-
-        }
+        
 
 
         internal void Test()

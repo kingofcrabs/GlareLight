@@ -14,9 +14,24 @@ using System.Windows.Media.Imaging;
 
 namespace GlareCalculator
 {
-    public class ShapeBase
+    interface IShape
+    {
+        void Render(DrawingContext drawingContext, bool shouldBlow);
+        void OnMouseMove(Point newPt);
+        void OnLeftMouseUp(Point pt);
+        void OnLeftMouseDown(Point pt);
+        bool IsInside(Point pt);
+       
+    }
+    public class ShapeBase:IShape
     {
         public Point invalidPt = new Point(-1, -1);
+       
+        public bool Selected { get; set; }
+        public bool Finished { get; set; }
+
+
+
         public virtual void Render(DrawingContext drawingContext, bool shouldBlow)
         {
             throw new NotImplementedException();
@@ -26,15 +41,18 @@ namespace GlareCalculator
         {
             throw new NotImplementedException();
         }
-        public bool Selected { get; set; }
-        public bool Finished { get; set; }
+
+        public virtual void OnLeftMouseDown(Point newPt)
+        {
+            throw new NotImplementedException();
+        }
 
         public virtual void OnLeftMouseUp(Point pt)
         {
             throw new NotImplementedException();
         }
 
-        public virtual void OnLeftMouseDown(Point pt)
+        public virtual bool IsInside(Point pt)
         {
             throw new NotImplementedException();
         }
@@ -52,6 +70,13 @@ namespace GlareCalculator
             Finished = false;
         }
 
+        public override bool IsInside(Point pt)
+        {
+            if(!Finished)
+                return false;
+
+            return GetDistance(ptCircle, pt) <= Radius;
+        }
         public override void OnLeftMouseDown(Point newPt)
         {
             if (ptCircle == invalidPt)
@@ -65,6 +90,7 @@ namespace GlareCalculator
                 return;
             Radius = GetDistance(ptCircle, pt);
             Finished = true;
+            Selected = false;
         }
         public override void OnMouseMove(Point newPt)
         {
@@ -87,12 +113,12 @@ namespace GlareCalculator
         override public void Render(DrawingContext drawingContext, bool shouldBlow)
         {
             int penWidth = 0;
-            //if (ptCircle != invalidPt && Selected)
-            //{
-            //    penWidth = shouldBlow ? 3 : 1;
-            //    int r = penWidth;
-            //    drawingContext.DrawEllipse(null, new Pen(Brushes.Red, penWidth), ptCircle, r, r);
-            //}
+            if (ptCircle != invalidPt && Selected)
+            {
+                penWidth = shouldBlow ? 3 : 1;
+                int r = penWidth;
+                drawingContext.DrawEllipse(null, new Pen(Brushes.Red, penWidth), ptCircle, r, r);
+            }
             if (Radius == 0)
                 return;
             Brush brush = Brushes.Blue;
@@ -114,6 +140,42 @@ namespace GlareCalculator
             Selected = true;
             Finished = false;
         }
+
+        public override bool IsInside(Point pt)
+        {
+            if (!Finished)
+                return false;
+            return IsPointInPolygon(pt, pts);
+        }
+
+        private bool IsPointInPolygon(Point point, List<Point> polygon)
+        {
+            int polygonLineCnt = polygon.Count;
+            int i = 0;
+            bool inside = false;
+            // x, y for tested point.
+            double pointX = point.X;
+            double pointY = point.Y;
+            // start / end point for the current polygon segment.
+            double startX, startY, endX, endY;
+            Point endPoint = polygon[polygonLineCnt - 1];
+            endX = endPoint.X;
+            endY = endPoint.Y;
+            while (i < polygonLineCnt)
+            {
+                startX = endX; startY = endY;
+                endPoint = polygon[i++];
+                endX = endPoint.X; endY = endPoint.Y;
+                //
+                inside ^= (endY > pointY ^ startY > pointY) /* ? pointY inside [startY;endY] segment ? */
+                          && /* if so, test if it is under the segment */
+                          ((pointX - endX) < (pointY - endY) * (startX - endX) / (startY - endY));
+            }
+            return inside;
+
+        }
+
+
 
         public void RemoveLast()
         {

@@ -22,7 +22,6 @@ namespace GlareCalculator
         ShapeBase newShape = null;
 
         Point invalidPt = new Point(-1,-1);
-        int selectedIndex = -1;
         bool shouldBlow = false;
         public delegate void ShapeChanged(List<ShapeBase> shapes);
         public event ShapeChanged onShapeChanged;
@@ -70,18 +69,6 @@ namespace GlareCalculator
             shapes.ForEach(x => x.Render(drawingContext, shouldBlow));
         }
 
-        private void DrawPolygon(Polygon polygon, SolidColorBrush brush, DrawingContext drawingContext)
-        {
-            if (polygon == null)
-                return;
-            polygon.Render(drawingContext, shouldBlow);
-        }
-
-        internal void SelectionChanged(int selectIndex)
-        {
-            selectedIndex = selectIndex;
-            InvalidateVisual();
-        }
 
         internal void CompletePolygon()
         {
@@ -97,6 +84,8 @@ namespace GlareCalculator
         public void CreateNewShape(Operation operation)
         {
             CurrentOperation = operation;
+            shapes.ForEach(x => x.Selected = false);
+            InvalidateVisual();
             newShape = null;
             if (operation != Operation.circle && operation != Operation.polygon)
                 return;
@@ -126,20 +115,31 @@ namespace GlareCalculator
 
         private void SelectShape(Point pt)
         {
-            //throw new NotImplementedException();
+            shapes.ForEach(x => x.Selected = false);
+            foreach(var shape in shapes)
+            {
+                if(shape.IsInside(pt))
+                {
+                    shape.Selected = true;
+                    break;
+                }
+            }
+            InvalidateVisual();
         }
 
         internal void LeftMouseUp(Point pt) //add pt to polygon or circle
         {
-            if (newShape == null)
-                return;
-            if (newShape.Finished)
-                return;
             if (CurrentOperation == Operation.select)
             {
                 SelectShape(pt);
                 return;
             }
+
+            if (newShape == null)
+                return;
+            if (newShape.Finished)
+                return;
+          
             newShape.OnLeftMouseUp(pt);
             if (newShape is Circle) //create a new circle
             {
