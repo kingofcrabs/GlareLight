@@ -18,14 +18,14 @@ namespace GlareCalculator
     public class MyCanvas : Canvas
     {
 
-        BitmapImage _img = null;
-        List<Polygon> polygons = new List<Polygon>();
-        Polygon tempPolygon = new Polygon();
+        List<ShapeBase> shapes = new List<ShapeBase>();
+        ShapeBase newShape = null;
+
         Point invalidPt = new Point(-1,-1);
         int selectedIndex = -1;
         bool shouldBlow = false;
-        public delegate void PolygonChanged(List<Polygon> polygons);
-        public event PolygonChanged onPolygonChanged;
+        public delegate void ShapeChanged(List<ShapeBase> shapes);
+        public event ShapeChanged onShapeChanged;
         private Timer timer = new Timer(500);
 
         public MyCanvas()
@@ -33,18 +33,8 @@ namespace GlareCalculator
             timer.Elapsed += timer_Elapsed;
             timer.Start();
         }
-        public void SetBkGroundImage()
-        {
-            string sFile = ConfigurationManager.AppSettings["srcImage"];
-            _img = new BitmapImage();
-            _img.BeginInit();
-            _img.CacheOption = BitmapCacheOption.OnLoad;
-            _img.UriSource = new Uri(sFile, UriKind.Absolute);
-            _img.EndInit();
-            ImageBrush imageBrush = new ImageBrush();
-            imageBrush.ImageSource = _img;
-            this.Background = imageBrush;
-        }
+
+        
 
         public void SetBkGroundImage(BitmapImage bmpImage)
         {
@@ -62,59 +52,22 @@ namespace GlareCalculator
             }));
         }
        
-        internal void LeftMouseUp(Point pt) //add pt to polygon
-        {
-            if (tempPolygon.Finished)
-                return;
-            tempPolygon.pts.Add(pt);
-            tempPolygon.currentPt = pt;
-            InvalidateVisual();
-        }
 
         internal static bool IsInDesignMode()
         {
             return System.Reflection.Assembly.GetExecutingAssembly().Location.Contains("VisualStudio");
         }
-        internal void Add()
-        {
-            if (tempPolygon.pts.Count < 3)
-                throw new Exception("多边形顶点必须大于等于3！");
-            if (!tempPolygon.Finished)
-                throw new Exception("未添加完成！");
-            tempPolygon.currentPt = invalidPt;
-            polygons.Add(tempPolygon);
-            tempPolygon = new Polygon();
-            polygons.ForEach(x => x.Selected = false);
-            
-            InvalidateVisual();
-            NotifyPolygonChanged();
-        }
+      
 
-        internal void DeleteLastPoint()
-        {
-            tempPolygon.RemoveLast();
-            InvalidateVisual();
-        }
-
-   
         protected override void OnRender(System.Windows.Media.DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
             if (IsInDesignMode())
                 return;
-            //if(tempPolygon.currentPt != invalidPt)
-            //{
-            //    int radius = shouldBlow ? 3 : 1;
-            //    drawingContext.DrawEllipse(null, new Pen(Brushes.Red, 2), tempPolygon.currentPt, radius, radius);
-            //}
-            
-            //DrawPolygon(tempPolygon,Brushes.Blue,drawingContext);
-            tempPolygon.Render(drawingContext, shouldBlow);
+            if(newShape != null)
+                newShape.Render(drawingContext, shouldBlow);
             var grayBrush = Brushes.Gray;
-            for (int i = 0; i < polygons.Count; i++)
-            {
-                polygons[i].Render(drawingContext, shouldBlow);
-            }
+            shapes.ForEach(x => x.Render(drawingContext, shouldBlow));
         }
 
         private void DrawPolygon(Polygon polygon, SolidColorBrush brush, DrawingContext drawingContext)
@@ -132,131 +85,98 @@ namespace GlareCalculator
 
         internal void CompletePolygon()
         {
-            tempPolygon.Enclose();
+            if (!(newShape is Polygon))
+                throw new Exception("当前形状不是多边形！");
+            ((Polygon)newShape).Enclose();
+            shapes.Add(newShape);
+            InvalidateVisual();
+            CreateNewShape(Operation.polygon);
+            NotifyShapeChanged();
+        }
+
+        public void CreateNewShape(Operation operation)
+        {
+            CurrentOperation = operation;
+            newShape = null;
+            if (operation != Operation.circle && operation != Operation.polygon)
+                return;
+            if(operation == Operation.polygon)
+                newShape = new Polygon();
+            else
+                newShape = new Circle();
+        }
+
+        private void NotifyShapeChanged()
+        {
+            if (onShapeChanged != null)
+                onShapeChanged(shapes);
+        }
+        
+        internal void LeftMouseDown(Point pt)
+        {
+            if (CurrentOperation == Operation.none || CurrentOperation == Operation.select)
+                return;
+
+           
+            if (newShape.Finished)
+                return;
+            newShape.OnLeftMouseDown(pt);
             InvalidateVisual();
         }
 
-        internal void Delete(int index)
+        private void SelectShape(Point pt)
         {
-            polygons.RemoveAt(index);
-            NotifyPolygonChanged();
+            //throw new NotImplementedException();
+        }
+
+        internal void LeftMouseUp(Point pt) //add pt to polygon or circle
+        {
+            if (newShape == null)
+                return;
+            if (newShape.Finished)
+                return;
+            if (CurrentOperation == Operation.select)
+            {
+                SelectShape(pt);
+                return;
+            }
+            newShape.OnLeftMouseUp(pt);
+            if (newShape is Circle) //create a new circle
+            {
+                shapes.Add(newShape);
+                CreateNewShape(Operation.circle);
+                NotifyShapeChanged();
+            }
             InvalidateVisual();
         }
-
-        void NotifyPolygonChanged()
-        {
-            if (onPolygonChanged != null)
-                onPolygonChanged(polygons);
-        }
-
-
 
         internal void LeftMouseMove(Point pt, Operation operation)
         {
-            switch(operation)
-            {
-                case Operation.polygon:
-                    if(!tempPolygon.Finished)
-                    {
-                        tempPolygon.currentPt = pt;
-                        InvalidateVisual();
-                    }
-                    break;
-                default:
-                    break;
-                //    throw new NotImplementedException();
-            }
-        }
-    }
-
-    interface IShape
-    {
-        void Render(DrawingContext drawingContext, bool shouldBlow);
-        bool Selected { get; set; }
-    }
-    public class Polygon : IShape
-    {
-        public List<Point> pts;
-        public Point currentPt;
-        private bool finished = false;
-        Point invalidPt = new Point(-1, -1);
-
-        public Polygon()
-        {
-            pts = new List<Point>();
-            currentPt = invalidPt;
-            Selected = true;
-        }
-
-        public void RemoveLast()
-        {
-            if (pts.Count == 0)
+            if (newShape == null)
                 return;
-            pts.RemoveAt(pts.Count - 1);
-            finished = false;
+        
+            newShape.OnMouseMove(pt);
+            InvalidateVisual();
         }
 
-        public bool  Selected { get; set; }
-        public bool Finished
-        {
+        Operation currentOp;
+        internal Operation CurrentOperation
+        { 
             get
             {
-                return finished;
+                return currentOp;
             }
-        }
-        public void Enclose()
-        {
-            if (pts.Count < 3)
-                throw new Exception("多边形最少要3个点!");
-            finished = true;
-            currentPt = pts[0];
-        }
-
-        public void Render(DrawingContext drawingContext, bool shouldBlow)
-        {
-            if (pts.Count > 0 && Selected)
+            set
             {
-                int radius = shouldBlow ? 3 : 1;
-                drawingContext.DrawEllipse(null, new Pen(Brushes.Red, 2), pts.Last(), radius, radius);
+                currentOp = value;
+               
             }
-            
-
-            Brush brush = Brushes.Blue;
-            int width = Selected ? 2 : 1;
-            for (int i = 0; i < pts.Count; i++)
-            {
-                Point ptStart;
-                Point ptEnd;
-                if (!Finished) //ignore the last
-                {
-                    if (i == pts.Count - 1)
-                        break;
-                }
-
-                if (i != pts.Count - 1)
-                {
-                    ptStart = pts[i];
-                    ptEnd = pts[i + 1];
-                }
-                else
-                {
-                    ptStart = pts[i];
-                    ptEnd = pts[0];
-                }
-                drawingContext.DrawLine(new Pen(brush, width), ptStart, ptEnd);
-            }
-            if (currentPt != invalidPt && pts.Count != 0)
-                drawingContext.DrawLine(new Pen(brush, width), pts.Last(), currentPt);
         }
+
+       
     }
 
+   
 
-    enum Operation
-    {
-        none,
-        polygon,
-        circle,
-        move,
-        select
-    };
+   
 }

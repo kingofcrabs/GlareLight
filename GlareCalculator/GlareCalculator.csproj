@@ -63,6 +63,7 @@
     </Compile>
     <Compile Include="GlobalVars.cs" />
     <Compile Include="ImageHelper.cs" />
+    <Compile Include="Shapes.cs" />
     <Compile Include="Utility.cs" />
     <Page Include="Configuration.xaml">
       <SubType>Designer</SubType>
@@ -137,6 +138,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="images\circle.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\calculator.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

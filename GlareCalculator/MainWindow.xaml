@@ -102,17 +102,21 @@
                 <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnCircle_Click" Name="btnCircle" Width="64">
                     <Image  Source="/Images/circle.png"/>
                 </ToggleButton>
-                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnMove_Click"  Name="btnMove" Width="64">
+                <!--<ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnMove_Click"  Name="btnMove" Width="64">
                     <Image  Source="/Images/move.png"/>
-                </ToggleButton>
+                </ToggleButton>-->
                 <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnSelect_Click" Name="btnSelect" Width="64">
                     <Image  Source="/Images/selection.png"/>
                 </ToggleButton>
             </WrapPanel>
-            <Label>添加删除：</Label>
+            
             <StackPanel Orientation="Horizontal">
-                <Button Name="btnAdd" Width="64" Content="Add" Click="btnAdd_Click"></Button>
-                <Button  Name="btnDelete"  Width="64" Click="btnDelete_Click" Content="Delete" ></Button>
+                <Button Name="btnCalculateUGR" Width="64"  Click="btnCalculateUGR_Click">
+                    <StackPanel>
+                    <Image  Source="/Images/calculator.jpg"/>
+                    <Label>计算UGR</Label>
+                    </StackPanel>
+                </Button>
             </StackPanel>
            
 

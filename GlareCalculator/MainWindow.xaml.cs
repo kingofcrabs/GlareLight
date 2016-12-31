@@ -24,69 +24,97 @@ namespace GlareCalculator
     /// </summary>
     public partial class MainWindow : Window
     {
-        List<Polygon> polygons = new List<Polygon>();
+        static readonly  Dictionary<Operation, ToggleButton> operation_ButtonControl = new Dictionary<Operation, ToggleButton>();
+
+        List<ShapeBase> shapes = new List<ShapeBase>();
         Brightness brightness = new Brightness();
         public MainWindow()
         {
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
-            myCanvas.onPolygonChanged += myCanvas_onPolygonChanged;
-            this.MouseDoubleClick += MainWindow_MouseDoubleClick;
+            myCanvas.onShapeChanged += myCanvas_onShapeChanged;
+            InitToggleOperationDict();
         }
 
-        void MainWindow_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        void myCanvas_onShapeChanged(List<ShapeBase> shapes)
         {
-            
+            this.shapes = shapes;
+            //OperationToggleButtonPressed(Operation.none); //reset
         }
 
-        void myCanvas_onPolygonChanged(List<Polygon> newPolygons)
-        {
-            List<string> strs = new List<string>();
-            this.polygons = newPolygons;
-            polygons.ForEach(x => strs.Add(Format(x)));
-            
-        }
-
-
-        //void myCanvas_onRectChanged(List<Rect> rects)
-        //{
-        //    List<string> strs = new List<string>();
-        //    rects.ForEach(x=>strs.Add(Format(x)));
-        //    lstRegions.ItemsSource = strs;
-        //    lstRegions.SelectedIndex = strs.Count - 1;
-        //}
-
-        private string Format(Polygon polygon)
-        {
-            int ptsCnt = polygon.pts.Count;
-            Point firstPt = polygon.pts[0];
-            bool finished = polygon.Finished;
-            return string.Format("Pts:{0}, first Pt {1}-{2}, finished: {3}", ptsCnt, firstPt.X,firstPt.Y,finished);
-        }
-     
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             //myCanvas.SetBkGroundImage();
             myCanvas.IsHitTestVisible = false;
             scrollViewer.PreviewMouseLeftButtonUp += scrollViewer_PreviewMouseLeftButtonUp;
+            scrollViewer.PreviewMouseLeftButtonDown += scrollViewer_PreviewMouseLeftButtonDown;
             scrollViewer.PreviewMouseMove += ScrollViewer_PreviewMouseMove;
   
+        }
+
+        void scrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Point pt = e.GetPosition(myCanvas);
+            myCanvas.LeftMouseDown(pt);
         }
 
         private void ScrollViewer_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             Point pt = e.GetPosition(myCanvas);
-            //if (Mouse.LeftButton == MouseButtonState.Pressed)
-                myCanvas.LeftMouseMove(pt,GetCurrentOperation());
+            myCanvas.LeftMouseMove(pt,GetCurrentOperation());
         }
 
         void scrollViewer_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             Point pt = e.GetPosition(myCanvas);
-            //if (Keyboard.IsKeyDown(Key.LeftCtrl))
             myCanvas.LeftMouseUp(pt);
         }
 
+       
+
+      
+        private void SetInfo(string str, bool error)
+        {
+            Brush brush = error ? Brushes.Red : Brushes.Black;
+            txtInfo.Text = str;
+            txtInfo.Foreground = brush;
+        }
+
+        //private void btnTest_Click(object sender, RoutedEventArgs e)
+        //{
+        //    GlareLight glareLight = new GlareLight();
+        //    //glareLight.Test();
+        //    if(brightness.vals.Count == 0)
+        //    {
+        //        SetInfo("No brightness file has been selected!", true);
+        //        return;
+        //    }
+
+        //    if(polygons.Count == 0)
+        //    {
+        //        SetInfo("No polygons has been set!", true);
+        //        return;
+        //    }
+        //    double ugr = glareLight.Calculate(brightness.vals, polygons);
+        //    SetInfo(string.Format("UGR is: {0}", ugr),false);
+        //}
+        #region button events
+        private void btnDel_Click(object sender, RoutedEventArgs e)
+        {
+            //if (lstRegions.SelectedIndex == -1)
+            //    return;
+            
+            //myCanvas.Delete(lstRegions.SelectedIndex);
+        }
+        private void btnSelect_Click(object sender, RoutedEventArgs e)
+        {
+            OperationToggleButtonPressed(Operation.select);
+        }
+
+        private void btnCalculateUGR_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
         private void btnOpen_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
@@ -95,62 +123,36 @@ namespace GlareCalculator
             fileDialog.Filter = "亮度文件(*.txt)|*.txt|所有文件(*.*)|(*.*)";
             if (fileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
                 return;
-           
+
             brightness.Read(fileDialog.FileName);
             SetInfo("Load brightness file successfully.", false);
             BitmapImage bmpImage = ImageHelper.CreateImage(brightness.vals);
-            
+
             myCanvas.SetBkGroundImage(bmpImage);
             //System.Windows.Forms.MessageBox.Show("Read finished!");
         }
-
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
+        private void btnConfig_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                myCanvas.Add();
-            }
-            catch(Exception ex)
-            {
-                SetInfo(ex.Message, true);
-            }
-            
-        }
 
-        private void SetInfo(string str, bool error)
+        }
+        //private void btnAdd_Click(object sender, RoutedEventArgs e)
+        //{
+        //    try
+        //    {
+        //        myCanvas.Add();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        SetInfo(ex.Message, true);
+        //    }
+
+        //}
+
+        private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            Brush brush = error ? Brushes.Red : Brushes.Black;
-            txtInfo.Text = str;
-            txtInfo.Foreground = brush;
+
         }
-
-        private void btnTest_Click(object sender, RoutedEventArgs e)
-        {
-            GlareLight glareLight = new GlareLight();
-            //glareLight.Test();
-            if(brightness.vals.Count == 0)
-            {
-                SetInfo("No brightness file has been selected!", true);
-                return;
-            }
-
-            if(polygons.Count == 0)
-            {
-                SetInfo("No polygons has been set!", true);
-                return;
-            }
-            double ugr = glareLight.Calculate(brightness.vals, polygons);
-            SetInfo(string.Format("UGR is: {0}", ugr),false);
-        }
-
-        private void btnDel_Click(object sender, RoutedEventArgs e)
-        {
-            //if (lstRegions.SelectedIndex == -1)
-            //    return;
-            
-            //myCanvas.Delete(lstRegions.SelectedIndex);
-        }
-
+        #endregion
 
         //Operation GetCurrentOperation()
         //{
@@ -176,7 +178,7 @@ namespace GlareCalculator
 
         private void DeleteLastPoint_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            myCanvas.DeleteLastPoint();
+            //myCanvas.DeleteLastPoint();
         }
 
         private void CompletePolygon_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -187,32 +189,24 @@ namespace GlareCalculator
 
         private void CompletePolygon_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            if(GetCurrentOperation() != Operation.polygon)
+            {
+                SetInfo("当前操作对象不是多边形，无法闭合！",true);
+                return;
+            }
             myCanvas.CompletePolygon();
         }
         #endregion
 
 
-        private void btnConfig_Click(object sender, RoutedEventArgs e)
-        {
 
-        }
-
-        private void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void btnDelete_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
+      
 
         #region operations
 
         private Operation GetCurrentOperation()
         {
-            var dict = GetToggleOperationDict();
-            foreach(var pair in dict)
+            foreach (var pair in operation_ButtonControl)
             {
                 if((bool)pair.Value.IsChecked)
                 {
@@ -222,28 +216,33 @@ namespace GlareCalculator
             return Operation.none;
             
         }
-        Dictionary<Operation, ToggleButton> GetToggleOperationDict()
+        Dictionary<Operation, ToggleButton> InitToggleOperationDict()
         {
-            Dictionary<Operation, ToggleButton> operation_ButtonControl = new Dictionary<Operation, ToggleButton>();
             operation_ButtonControl.Add(Operation.polygon, btnPolygon);
             operation_ButtonControl.Add(Operation.circle, btnCircle);
-            operation_ButtonControl.Add(Operation.move, btnMove);
+            //operation_ButtonControl.Add(Operation.move, btnMove);
             operation_ButtonControl.Add(Operation.select, btnSelect);
             return operation_ButtonControl;
         }
         private void OperationToggleButtonPressed(Operation op)
         {
-
-            var operation_ButtonControl = GetToggleOperationDict();
             List<Operation> operations = new List<Operation>(){
-                Operation.polygon,Operation.circle,Operation.move,Operation.select
+                Operation.polygon,Operation.circle,Operation.select
             };
             foreach(Operation tmpOp in operations)
             {
                 if (tmpOp == op)
+                {
+                    if ((bool)!operation_ButtonControl[tmpOp].IsChecked)
+                    {
+                        op = Operation.none;
+                    }
                     continue;
+                }
+                    
                 operation_ButtonControl[tmpOp].IsChecked = false;
             }
+            myCanvas.CreateNewShape(op);
         }
 
         private void btnPolygon_Click(object sender, RoutedEventArgs e)
@@ -256,16 +255,14 @@ namespace GlareCalculator
             OperationToggleButtonPressed(Operation.circle);
         }
 
-        private void btnMove_Click(object sender, RoutedEventArgs e)
-        {
-            OperationToggleButtonPressed(Operation.move);
-        }
+        //private void btnMove_Click(object sender, RoutedEventArgs e)
+        //{
+        //    OperationToggleButtonPressed(Operation.move);
+        //}
 
-        private void btnSelect_Click(object sender, RoutedEventArgs e)
-        {
-            OperationToggleButtonPressed(Operation.select);
-        }
-
+       
         #endregion
+
+       
     }
 }
