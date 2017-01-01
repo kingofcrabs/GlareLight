@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -113,7 +114,28 @@ namespace GlareCalculator
 
         private void btnCalculateUGR_Click(object sender, RoutedEventArgs e)
         {
+            GlareLight glareLight = new GlareLight();
+            List<GlareResult> results = new List<GlareResult>();
+            var ugr = glareLight.Calculate(brightness.vals, shapes, ref results);
 
+            DataTable  tbl = new DataTable("result");
+            tbl.Columns.Add("ID", typeof(string));
+            tbl.Columns.Add("LA", typeof(string));
+            tbl.Columns.Add("Omega", typeof(string));
+            tbl.Columns.Add("P", typeof(string));
+
+            int ID = 1;
+            foreach(var result in results)
+            {
+                string sID = ID.ToString();
+                ID++;
+                tbl.Rows.Add(sID,
+                    result.La.ToString("0.00"),
+                    result.ω.ToString("0.000"),
+                    result.P.ToString("0.00"));
+            }
+            lstviewResult.ItemsSource = tbl.DefaultView;
+            txtUGR.Text = ugr.ToString("0.00");
         }
         private void btnOpen_Click(object sender, RoutedEventArgs e)
         {
@@ -126,9 +148,9 @@ namespace GlareCalculator
 
             brightness.Read(fileDialog.FileName);
             SetInfo("Load brightness file successfully.", false);
-            PseudoColor pesudoColor = new PseudoColor();
-            pesudoColor.Convert(brightness.vals);
-            BitmapImage bmpImage = ImageHelper.CreateImage(pesudoColor.Colors);
+            //PseudoColor pesudoColor = new PseudoColor();
+            //pesudoColor.Convert(brightness.vals);
+            BitmapImage bmpImage = ImageHelper.CreateImage(brightness.vals);
 
             myCanvas.SetBkGroundImage(bmpImage);
             //System.Windows.Forms.MessageBox.Show("Read finished!");

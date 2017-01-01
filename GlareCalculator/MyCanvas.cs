@@ -118,7 +118,7 @@ namespace GlareCalculator
             shapes.ForEach(x => x.Selected = false);
             foreach(var shape in shapes)
             {
-                if(shape.IsInside(pt))
+                if(shape.PtIsInside(pt))
                 {
                     shape.Selected = true;
                     break;

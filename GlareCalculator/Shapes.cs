@@ -20,7 +20,7 @@ namespace GlareCalculator
         void OnMouseMove(Point newPt);
         void OnLeftMouseUp(Point pt);
         void OnLeftMouseDown(Point pt);
-        bool IsInside(Point pt);
+        bool PtIsInside(Point pt);
        
     }
     public class ShapeBase:IShape
@@ -52,7 +52,7 @@ namespace GlareCalculator
             throw new NotImplementedException();
         }
 
-        public virtual bool IsInside(Point pt)
+        public virtual bool PtIsInside(Point pt)
         {
             throw new NotImplementedException();
         }
@@ -70,7 +70,7 @@ namespace GlareCalculator
             Finished = false;
         }
 
-        public override bool IsInside(Point pt)
+        public override bool PtIsInside(Point pt)
         {
             if(!Finished)
                 return false;
@@ -141,7 +141,7 @@ namespace GlareCalculator
             Finished = false;
         }
 
-        public override bool IsInside(Point pt)
+        public override bool PtIsInside(Point pt)
         {
             if (!Finished)
                 return false;
