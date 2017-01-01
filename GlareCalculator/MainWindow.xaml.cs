@@ -126,7 +126,9 @@ namespace GlareCalculator
 
             brightness.Read(fileDialog.FileName);
             SetInfo("Load brightness file successfully.", false);
-            BitmapImage bmpImage = ImageHelper.CreateImage(brightness.vals);
+            PseudoColor pesudoColor = new PseudoColor();
+            pesudoColor.Convert(brightness.vals);
+            BitmapImage bmpImage = ImageHelper.CreateImage(pesudoColor.Colors);
 
             myCanvas.SetBkGroundImage(bmpImage);
             //System.Windows.Forms.MessageBox.Show("Read finished!");
@@ -253,6 +255,11 @@ namespace GlareCalculator
         private void btnCircle_Click(object sender, RoutedEventArgs e)
         {
             OperationToggleButtonPressed(Operation.circle);
+        }
+
+        private void btnFakeColor_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         //private void btnMove_Click(object sender, RoutedEventArgs e)

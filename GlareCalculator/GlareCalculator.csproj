@@ -63,6 +63,7 @@
     </Compile>
     <Compile Include="GlobalVars.cs" />
     <Compile Include="ImageHelper.cs" />
+    <Compile Include="PseudoColor.cs" />
     <Compile Include="Shapes.cs" />
     <Compile Include="Utility.cs" />
     <Page Include="Configuration.xaml">
@@ -141,6 +142,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="images\calculator.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\fakeColor.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

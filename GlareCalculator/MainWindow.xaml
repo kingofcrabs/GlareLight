@@ -26,8 +26,9 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="3*"/>  
-            
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="50"/>
+
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
@@ -90,31 +91,31 @@
                 </StackPanel>
             </Button>
         </StackPanel>
-
-
-       
         <StackPanel Name="operations" Grid.Row="2">
             <Label>操作：</Label>
             <WrapPanel Name="grpShape">
-                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnPolygon_Click" Name="btnPolygon" Width="64">
+                <ToggleButton ToolTip="多边形" Style="{StaticResource ToggleButtonStyle1}" Click="btnPolygon_Click" Name="btnPolygon" Width="64">
                     <Image  Source="/Images/polygon.png"/>
                 </ToggleButton>
-                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnCircle_Click" Name="btnCircle" Width="64">
+                <ToggleButton ToolTip="圆" Style="{StaticResource ToggleButtonStyle1}" Click="btnCircle_Click" Name="btnCircle" Width="64">
                     <Image  Source="/Images/circle.png"/>
                 </ToggleButton>
                 <!--<ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnMove_Click"  Name="btnMove" Width="64">
                     <Image  Source="/Images/move.png"/>
                 </ToggleButton>-->
-                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnSelect_Click" Name="btnSelect" Width="64">
+                <ToggleButton ToolTip="选中" Style="{StaticResource ToggleButtonStyle1}" Click="btnSelect_Click" Name="btnSelect" Width="64">
                     <Image  Source="/Images/selection.png"/>
+                </ToggleButton>
+                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnFakeColor_Click" Name="btnFakeColor" Width="64">
+                    <Image ToolTip="伪彩"  Source="/Images/fakeColor.jpg"/>
                 </ToggleButton>
             </WrapPanel>
             
             <StackPanel Orientation="Horizontal">
-                <Button Name="btnCalculateUGR" Width="64"  Click="btnCalculateUGR_Click">
+                <Button Name="btnCalculateUGR" Width="64"  Click="btnCalculateUGR_Click" ToolTip="计算UGR">
                     <StackPanel>
                     <Image  Source="/Images/calculator.jpg"/>
-                    <Label>计算UGR</Label>
+                    
                     </StackPanel>
                 </Button>
             </StackPanel>
@@ -134,7 +135,6 @@
             </Grid>
             
         </StackPanel>
-        
         <StackPanel Name="infoStackPanel" Grid.Row="3" >
             <Label>信息：</Label>
             <TextBox Name="txtInfo" MinHeight="80" TextWrapping="Wrap"></TextBox>
@@ -157,6 +157,29 @@
             </Grid>
             </Grid>
         </Grid>
+        <Grid Grid.Column="2" Grid.RowSpan="4">
+            <Grid.RowDefinitions>
+                
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid Name="gridSlider" Grid.Row="1"  >
+                <Slider Grid.Column="2" Orientation="Vertical"  Width="30" Height="{Binding ElementName=gridSlider, Path=ActualHeight}"
+                    >
+                    <Slider.Background>
+                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,100" >
+                            <GradientStop Color="Black" Offset="1"/>
+                            <GradientStop Color="White" Offset="0"/>
+                            <LinearGradientBrush.RelativeTransform>
+                                <ScaleTransform ScaleX="0.075" ScaleY="0.010"/>
+                            </LinearGradientBrush.RelativeTransform>
+                        </LinearGradientBrush>
+                    </Slider.Background>
+
+
+                </Slider>
+            </Grid>
+        </Grid>
+        
         
     </Grid>
     

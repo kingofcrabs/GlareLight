@@ -181,6 +181,30 @@ namespace GlareCalculator
                 Pixels[i] = v;
             }
         }
+
+        static public BitmapImage CreateImage(List<List<Color>> colors)
+        {
+            int height = colors.Count;
+            int width = 100 * ((colors[0].Count + 99) / 100);
+            int orgWidth = colors[0].Count;
+           
+            var b = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            LockBitmap lockBitmap = new LockBitmap(b);
+            lockBitmap.LockBits();
+            //lockBitmap.SetPixel(100, 100, Color.White);
+            for (int y = 0; y < lockBitmap.Height; y++)
+            {
+                for (int x = 0; x < orgWidth; x++)
+                {
+                    lockBitmap.SetPixel(x, y, colors[y][x]);
+                }
+            }
+            lockBitmap.UnlockBits();
+            b.Save("d:\\test.png");
+            return b.ToBitmapImage();
+        }
+
+
         static public BitmapImage CreateImage(List<List<double>> vals)
         {
             int height = vals.Count;
