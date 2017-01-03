@@ -98,13 +98,13 @@ namespace GlareCalculator
             get;
             set;
         }
-        public List<List<Color>> Convert(List<List<double>> grayVals)
+        public List<List<Color>> Convert(List<List<byte>> grayVals)
         {
-            List<double> maxList = grayVals.Select(l => l.Max()).ToList();
-            List<double> minList = grayVals.Select(l => l.Min()).ToList();
-            double max = maxList.Max();
-            double min = minList.Min();
-            double unit = (max-min)/80;
+            List<byte> maxList = grayVals.Select(l => l.Max()).ToList();
+            List<byte> minList = grayVals.Select(l => l.Min()).ToList();
+            byte max = maxList.Max();
+            byte min = minList.Min();
+            double unit = (max-min)/80.0;
             Colors = new List<List<Color>>();
             foreach(var lineVals in grayVals)
             {

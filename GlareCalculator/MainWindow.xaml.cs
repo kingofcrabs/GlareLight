@@ -40,7 +40,7 @@ namespace GlareCalculator
         void myCanvas_onShapeChanged(List<ShapeBase> shapes)
         {
             this.shapes = shapes;
-            //OperationToggleButtonPressed(Operation.none); //reset
+            
         }
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -81,24 +81,7 @@ namespace GlareCalculator
             txtInfo.Foreground = brush;
         }
 
-        //private void btnTest_Click(object sender, RoutedEventArgs e)
-        //{
-        //    GlareLight glareLight = new GlareLight();
-        //    //glareLight.Test();
-        //    if(brightness.vals.Count == 0)
-        //    {
-        //        SetInfo("No brightness file has been selected!", true);
-        //        return;
-        //    }
-
-        //    if(polygons.Count == 0)
-        //    {
-        //        SetInfo("No polygons has been set!", true);
-        //        return;
-        //    }
-        //    double ugr = glareLight.Calculate(brightness.vals, polygons);
-        //    SetInfo(string.Format("UGR is: {0}", ugr),false);
-        //}
+        
         #region button events
         private void btnDel_Click(object sender, RoutedEventArgs e)
         {
@@ -114,9 +97,10 @@ namespace GlareCalculator
 
         private void btnCalculateUGR_Click(object sender, RoutedEventArgs e)
         {
+            OperationToggleButtonPressed(Operation.none); //reset
             GlareLight glareLight = new GlareLight();
             List<GlareResult> results = new List<GlareResult>();
-            var ugr = glareLight.Calculate(brightness.vals, shapes, ref results);
+            var ugr = glareLight.Calculate(brightness.orgVals, shapes, ref results);
 
             DataTable  tbl = new DataTable("result");
             tbl.Columns.Add("ID", typeof(string));
@@ -148,29 +132,16 @@ namespace GlareCalculator
 
             brightness.Read(fileDialog.FileName);
             SetInfo("Load brightness file successfully.", false);
-            //PseudoColor pesudoColor = new PseudoColor();
-            //pesudoColor.Convert(brightness.vals);
-            BitmapImage bmpImage = ImageHelper.CreateImage(brightness.vals);
-
+            BitmapImage bmpImage = ImageHelper.CreateImage(brightness.grayVals);
             myCanvas.SetBkGroundImage(bmpImage);
             //System.Windows.Forms.MessageBox.Show("Read finished!");
         }
         private void btnConfig_Click(object sender, RoutedEventArgs e)
         {
-
+            Configuration configWindow = new Configuration();
+            configWindow.Show();
         }
-        //private void btnAdd_Click(object sender, RoutedEventArgs e)
-        //{
-        //    try
-        //    {
-        //        myCanvas.Add();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        SetInfo(ex.Message, true);
-        //    }
-
-        //}
+       
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
@@ -244,14 +215,14 @@ namespace GlareCalculator
         {
             operation_ButtonControl.Add(Operation.polygon, btnPolygon);
             operation_ButtonControl.Add(Operation.circle, btnCircle);
-            //operation_ButtonControl.Add(Operation.move, btnMove);
+            operation_ButtonControl.Add(Operation.fakeColor, btnFakeColor);
             operation_ButtonControl.Add(Operation.select, btnSelect);
             return operation_ButtonControl;
         }
         private void OperationToggleButtonPressed(Operation op)
         {
             List<Operation> operations = new List<Operation>(){
-                Operation.polygon,Operation.circle,Operation.select
+                Operation.polygon,Operation.circle,Operation.select,Operation.fakeColor
             };
             foreach(Operation tmpOp in operations)
             {
@@ -281,13 +252,19 @@ namespace GlareCalculator
 
         private void btnFakeColor_Click(object sender, RoutedEventArgs e)
         {
-
+            BitmapImage bmpImage;
+            if ((bool)btnFakeColor.IsChecked)
+            {
+                bmpImage = ImageHelper.CreateImage(brightness.colorVals);
+            }
+            else
+            {
+                bmpImage = ImageHelper.CreateImage(brightness.grayVals);
+            }
+            myCanvas.SetBkGroundImage(bmpImage);
+            OperationToggleButtonPressed(Operation.fakeColor);
+            
         }
-
-        //private void btnMove_Click(object sender, RoutedEventArgs e)
-        //{
-        //    OperationToggleButtonPressed(Operation.move);
-        //}
 
        
         #endregion

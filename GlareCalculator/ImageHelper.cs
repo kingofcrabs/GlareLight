@@ -205,30 +205,25 @@ namespace GlareCalculator
         }
 
 
-        static public BitmapImage CreateImage(List<List<double>> vals)
+        static public BitmapImage CreateImage(List<List<byte>> vals)
         {
             int height = vals.Count;
             int width = 100*((vals[0].Count+99)/100);
             int orgWidth = vals[0].Count;
-            List<double> maxList = vals.Select(l => l.Max()).ToList();
-            List<double> minList = vals.Select(l => l.Min()).ToList();
-            double max = maxList.Max();
-            double min = minList.Min();
-            double grayUnit = (max - min) / 255;
             var b = new Bitmap(width, height, PixelFormat.Format24bppRgb);
             LockBitmap lockBitmap = new LockBitmap(b);
             lockBitmap.LockBits();
-            //lockBitmap.SetPixel(100, 100, Color.White);
+
             for (int y = 0; y < lockBitmap.Height; y++)
             {
                 for (int x = 0; x < orgWidth; x++)
                 {
-                    byte val = (byte)((vals[y][x] - min) / grayUnit);
+                    int index = y * orgWidth + x;
+                    byte val = vals[y][x];
                     lockBitmap.SetPixel(x, y, Color.FromArgb(val, val, val));
                 }
             }
             lockBitmap.UnlockBits();
-            b.Save("d:\\test.png");
             return b.ToBitmapImage();
         }
     }

@@ -260,7 +260,7 @@ namespace GlareCalculator
         none,
         polygon,
         circle,
-        //move,
+        fakeColor,
         select
     };
 }

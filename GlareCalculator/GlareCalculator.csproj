@@ -35,6 +35,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>glare.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -123,9 +126,6 @@
     <Resource Include="images\save.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="images\glare.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="images\move.png" />
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +145,18 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="images\fakeColor.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="favicon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\glare.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="favicon %281%29.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="glare.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

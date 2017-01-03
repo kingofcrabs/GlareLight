@@ -103,7 +103,7 @@ namespace GlareCalculator
         
         internal void LeftMouseDown(Point pt)
         {
-            if (CurrentOperation == Operation.none || CurrentOperation == Operation.select)
+            if (CurrentOperation != Operation.circle && CurrentOperation != Operation.polygon)
                 return;
 
            
