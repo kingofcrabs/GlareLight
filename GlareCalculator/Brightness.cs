@@ -16,6 +16,7 @@ namespace GlareCalculator
         public List<List<Color>> colorVals = new List<List<Color>>();
         public void Read(string sFile)
         {
+            orgVals.Clear();
             using (StreamReader sr = new StreamReader(sFile))
             {
                 int lineNum = 1;
@@ -41,6 +42,7 @@ namespace GlareCalculator
 
         void Strech()
         {
+            grayVals.Clear();
             byte[] map = new byte[256];
             long[] lCounts = new long[256]; 
             //each gray level count
