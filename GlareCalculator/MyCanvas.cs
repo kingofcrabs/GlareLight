@@ -33,7 +33,7 @@ namespace GlareCalculator
             timer.Start();
         }
 
-        
+      
 
         public void SetBkGroundImage(BitmapImage bmpImage)
         {
@@ -69,6 +69,46 @@ namespace GlareCalculator
             shapes.ForEach(x => x.Render(drawingContext, shouldBlow));
         }
 
+
+
+        internal void OnDelete()
+        {
+            if(newShape != null) //operate on newShape
+            {
+                OnDelete(newShape);
+                return;
+            }
+            var selectedShapes = shapes.Where(x => x.Selected);
+            if (selectedShapes.Count() == 0)
+                return;
+            OnDelete(selectedShapes.First());
+        }
+
+        private void OnDelete(ShapeBase shapeBase)
+        {
+            if (shapeBase.Finished || shapeBase is Circle)
+            {
+                if (shapeBase == newShape)
+                    newShape = null;
+                else
+                {
+                    shapes.Remove(shapeBase);
+                }
+                
+            }
+            else
+            {
+                Polygon polygon = (Polygon)shapeBase;
+                if (polygon.pts.Count > 0)
+                {
+                    polygon.pts.Remove(polygon.pts.Last());
+                }
+            }
+            InvalidateVisual();
+
+
+
+        }
 
         internal void CompletePolygon()
         {
@@ -120,6 +160,7 @@ namespace GlareCalculator
             {
                 if(shape.PtIsInside(pt))
                 {
+                    newShape = null;
                     shape.Selected = true;
                     break;
                 }

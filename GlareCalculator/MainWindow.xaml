@@ -4,18 +4,21 @@
         xmlns:local="clr-namespace:GlareCalculator"
         Title="GlareCalculator" Icon="Images/glare.jpg" Height="700" Width="1000">
     <Window.Resources>
-        <RoutedUICommand x:Key="DeleteLastPoint" Text="Delete Last Point." />
+        <RoutedUICommand x:Key="DeleteShape" Text="Delete." />
         <RoutedUICommand x:Key="CompletePolygon" Text="Finish Editing the polygon." />
     </Window.Resources>
     <Window.InputBindings>
-        <KeyBinding Modifiers="Ctrl" Key="D" Command="{StaticResource DeleteLastPoint}"/>
+        <KeyBinding Key="Delete" Command="{StaticResource DeleteShape}"/>
         <KeyBinding Modifiers="Ctrl" Key="P" Command="{StaticResource CompletePolygon}"/>
     </Window.InputBindings>
     <Window.CommandBindings>
-        <CommandBinding Command="{StaticResource DeleteLastPoint}"
-                    CanExecute="DeleteLastPoint_CanExecute"
-                    Executed="DeleteLastPoint_Executed"/>
-
+        <CommandBinding Command="{StaticResource DeleteShape}"
+                    CanExecute="OnDelete_CanExecute"
+                    Executed="OnDelete_Executed"/>
+        <CommandBinding Command="Open"
+                    CanExecute="OnOpenFile_CanExecute"
+                    Executed="OnOpenFile_Executed"/>
+        
         <CommandBinding Command="{StaticResource CompletePolygon}"
                     CanExecute="CompletePolygon_CanExecute"
                     Executed="CompletePolygon_Executed"/>
@@ -56,12 +59,10 @@
         <DockPanel Grid.ColumnSpan="2">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="文件">
-                    <MenuItem Command="Open" />
-                    <Separator />
-                    <MenuItem Header="打开" />
+                    <MenuItem Command="Open" Header="打开" />
                 </MenuItem>
                 <MenuItem Header="帮助">
-                    <MenuItem Command="Help" />
+                    <MenuItem Header="关于" Command="Help" />
                 </MenuItem>
             </Menu>
         </DockPanel>
@@ -69,20 +70,18 @@
            
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="1">
-            
-
-            <Button Name="btnOpen" Click="btnOpen_Click"  ToolTip="打开定义文件.">
+            <Button Name="btnOpen" Command="Open" ToolTip="打开定义文件.">
                 <StackPanel Orientation="Vertical" >
                     <Image Source="/Images/open.jpg"  Height="55"/>
                     <TextBlock FontSize="16" TextAlignment="Center" Margin="3,0,0,0">打开</TextBlock>
                 </StackPanel>
             </Button>
-            <Button Name="btnSave" Click="btnSave_Click" ToolTip="保持到文件.">
+            <!--<Button Name="btnSave" Click="btnSave_Click" ToolTip="保持到文件.">
                 <StackPanel Orientation="Vertical" >
                     <Image Source="/Images/save.jpg"  Height="55"/>
                     <TextBlock FontSize="16" TextAlignment="Center" Margin="3,0,0,0">保存</TextBlock>
                 </StackPanel>
-            </Button>
+            </Button>-->
             <Button Name="btnConfig" Click="btnConfig_Click" ToolTip="配置.">
                 <StackPanel Orientation="Vertical" >
                     <Image Source="/Images/config.png"  Height="55"/>
@@ -117,7 +116,7 @@
                     </StackPanel>
                 </Button>
                 <Label VerticalAlignment="Center" FontSize="32">UGR:</Label>
-                <TextBox Name="txtUGR" FontSize="32" VerticalAlignment="Center" Text="" Width="100" Margin="10,0,0,0"></TextBox>
+                <TextBox Name="txtUGR" FontSize="32" VerticalAlignment="Center" Text="" Width="100" Margin="0,0,10,0"></TextBox>
             </StackPanel>
            
 
@@ -127,16 +126,21 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Label>UGR区域信息：</Label>
-                <ListView Name="lstviewResult"  FontFamily="SimSun" Grid.Row="1">
-                    <ListView.View>
-                        <GridView x:Name="gridView1">
-                            <GridViewColumn Header="ID" Width="30" DisplayMemberBinding="{Binding Path=ID}"></GridViewColumn>
-                            <GridViewColumn Header="La" Width="60" DisplayMemberBinding="{Binding Path=LA}"></GridViewColumn>
-                            <GridViewColumn Header="ω"  Width="60" DisplayMemberBinding="{Binding Path=Omega}"></GridViewColumn>
-                            <GridViewColumn Header="P"  Width="60" DisplayMemberBinding="{Binding Path=P}"></GridViewColumn>
-                        </GridView>
-                    </ListView.View>
-                </ListView>
+                <ScrollViewer x:Name="scrollViewerResult" Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                   HorizontalScrollBarVisibility="Auto" VerticalAlignment="Top" >
+                    <ListView Name="lstviewResult"  FontFamily="SimSun" >
+                        <ListView.View>
+                            <GridView x:Name="gridView1">
+                                <GridViewColumn Header="ID" Width="30" DisplayMemberBinding="{Binding Path=ID}"></GridViewColumn>
+                                <GridViewColumn Header="La" Width="60" DisplayMemberBinding="{Binding Path=LA}"></GridViewColumn>
+                                <GridViewColumn Header="ω"  Width="60" DisplayMemberBinding="{Binding Path=Omega}"></GridViewColumn>
+                                <GridViewColumn Header="P"  Width="60" DisplayMemberBinding="{Binding Path=P}"></GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+
+                </ScrollViewer>
+                    
             </Grid>
             
         </StackPanel>

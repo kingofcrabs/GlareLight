@@ -50,8 +50,9 @@ namespace GlareCalculator
             scrollViewer.PreviewMouseLeftButtonUp += scrollViewer_PreviewMouseLeftButtonUp;
             scrollViewer.PreviewMouseLeftButtonDown += scrollViewer_PreviewMouseLeftButtonDown;
             scrollViewer.PreviewMouseMove += ScrollViewer_PreviewMouseMove;
-  
         }
+
+       
 
         void scrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -123,19 +124,9 @@ namespace GlareCalculator
         }
         private void btnOpen_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog fileDialog = new OpenFileDialog();
-            fileDialog.Multiselect = true;
-            fileDialog.Title = "请选择文件";
-            fileDialog.Filter = "亮度文件(*.txt)|*.txt|所有文件(*.*)|(*.*)";
-            if (fileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-                return;
-
-            brightness.Read(fileDialog.FileName);
-            SetInfo("Load brightness file successfully.", false);
-            BitmapImage bmpImage = ImageHelper.CreateImage(brightness.grayVals);
-            myCanvas.SetBkGroundImage(bmpImage);
-            //System.Windows.Forms.MessageBox.Show("Read finished!");
+            OnOpenFile();
         }
+
         private void btnConfig_Click(object sender, RoutedEventArgs e)
         {
             Configuration configWindow = new Configuration();
@@ -155,9 +146,33 @@ namespace GlareCalculator
         //}
 
         #region commands
-       
 
-        private void DeleteLastPoint_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        private void OnOpenFile_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            OnOpenFile();
+        }
+
+        private void OnOpenFile()
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.Multiselect = true;
+            fileDialog.Title = "请选择文件";
+            fileDialog.Filter = "亮度文件(*.txt)|*.txt|所有文件(*.*)|(*.*)";
+            if (fileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                return;
+
+            brightness.Read(fileDialog.FileName);
+            SetInfo("Load brightness file successfully.", false);
+            BitmapImage bmpImage = ImageHelper.CreateImage(brightness.grayVals);
+            myCanvas.SetBkGroundImage(bmpImage);
+        }
+
+        private void OnOpenFile_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void OnDelete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;
         }
@@ -171,9 +186,16 @@ namespace GlareCalculator
             e.CanExecute = true;
         }
 
-        private void DeleteLastPoint_Executed(object sender, ExecutedRoutedEventArgs e)
+        private void OnDelete_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            //myCanvas.DeleteLastPoint();
+            var currentOperation = GetCurrentOperation();
+            List<Operation> validOperations = new List<Operation>();
+            validOperations.Add(Operation.polygon);
+            validOperations.Add(Operation.circle);
+            validOperations.Add(Operation.select);
+            if (!validOperations.Contains(currentOperation))
+                return;
+            myCanvas.OnDelete();
         }
 
         private void CompletePolygon_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -184,9 +206,15 @@ namespace GlareCalculator
 
         private void CompletePolygon_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if(GetCurrentOperation() != Operation.polygon)
+            OnComplete();
+            
+        }
+
+        private void OnComplete()
+        {
+            if (GetCurrentOperation() != Operation.polygon)
             {
-                SetInfo("当前操作对象不是多边形，无法闭合！",true);
+                SetInfo("当前操作对象不是多边形，无法闭合！", true);
                 return;
             }
             myCanvas.CompletePolygon();
@@ -195,7 +223,7 @@ namespace GlareCalculator
 
 
 
-      
+
 
         #region operations
 
@@ -266,8 +294,11 @@ namespace GlareCalculator
             
         }
 
-       
+
+
         #endregion
+
+      
 
        
     }
