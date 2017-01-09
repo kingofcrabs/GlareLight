@@ -102,8 +102,8 @@ namespace GlareCalculator
         {
             List<byte> maxList = grayVals.Select(l => l.Max()).ToList();
             List<byte> minList = grayVals.Select(l => l.Min()).ToList();
-            byte max = maxList.Max();
-            byte min = minList.Min();
+            var max = maxList.Max();
+            var min = minList.Min();
             double unit = (max-min)/80.0;
             Colors = new List<List<Color>>();
             foreach(var lineVals in grayVals)

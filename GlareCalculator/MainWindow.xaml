@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:GlareCalculator"
+        xmlns:oxy="http://oxyplot.org/wpf"
         Title="GlareCalculator" Icon="Images/glare.jpg" Height="700" Width="1000">
     <Window.Resources>
         <RoutedUICommand x:Key="DeleteShape" Text="Delete." />
@@ -144,43 +145,25 @@
             </Grid>
             
         </StackPanel>
-        
-        <Grid Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" >
-                <ScrollViewer x:Name="scrollViewer"  VerticalScrollBarVisibility="Visible"
+
+        <Grid Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"  >
+            <oxy:Plot Title="Histogram">
+                <oxy:LinearBarSeries ItemsSource="{Binding Histogram}" DataFieldX="GrayLevel" DataFieldY="Count" Title="Gray&amp;Count" FillColor="#454CAF50" StrokeColor="#4CAF50" StrokeThickness="1" BarWidth="5"/>
+            </oxy:Plot>
+ 
+            <ScrollViewer x:Name="scrollViewer"  Visibility="Hidden" VerticalScrollBarVisibility="Visible"
                    HorizontalScrollBarVisibility="Visible" VerticalAlignment="Top" >
                     <local:MyCanvas x:Name="myCanvas" Width="1362" Height="581" >
                     </local:MyCanvas>
-
                 </ScrollViewer>
+            
+            
+            
         </Grid>
         <StackPanel Name="infoStackPanel" Grid.Column="1" Grid.Row="3" Margin="1,0,10,5">
             <Label>信息：</Label>
             <TextBox Name="txtInfo" Height="100" Margin="0,0,0,5" TextWrapping="Wrap"></TextBox>
         </StackPanel>
-        <!--<Grid Grid.Column="2" Grid.RowSpan="4">
-            <Grid.RowDefinitions>
-                
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Grid Name="gridSlider" Grid.Row="1"  >
-                <Slider Grid.Column="2" Orientation="Vertical"  Width="30" Height="{Binding ElementName=gridSlider, Path=ActualHeight}"
-                    >
-                    <Slider.Background>
-                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,100" >
-                            <GradientStop Color="Black" Offset="1"/>
-                            <GradientStop Color="White" Offset="0"/>
-                            <LinearGradientBrush.RelativeTransform>
-                                <ScaleTransform ScaleX="0.075" ScaleY="0.010"/>
-                            </LinearGradientBrush.RelativeTransform>
-                        </LinearGradientBrush>
-                    </Slider.Background>
-
-
-                </Slider>
-            </Grid>
-        </Grid>-->
-        
-        
     </Grid>
     
 </Window>

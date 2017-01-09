@@ -39,6 +39,14 @@
     <ApplicationIcon>glare.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="OxyPlot, Version=2.0.0.0, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
+      <HintPath>..\packages\OxyPlot.Core.2.0.0-unstable0956\lib\net40\OxyPlot.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="OxyPlot.Wpf, Version=2.0.0.0, Culture=neutral, PublicKeyToken=75e952ba404cdbb0, processorArchitecture=MSIL">
+      <HintPath>..\packages\OxyPlot.Wpf.2.0.0-unstable0956\lib\net40\OxyPlot.Wpf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
@@ -69,6 +77,7 @@
     <Compile Include="PseudoColor.cs" />
     <Compile Include="Shapes.cs" />
     <Compile Include="Utility.cs" />
+    <Compile Include="ViewModels\MainWindowModel.cs" />
     <Page Include="Configuration.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -108,6 +117,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -147,13 +157,7 @@
     <Resource Include="images\fakeColor.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="favicon.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="images\glare.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="favicon %281%29.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="glare.ico" />
