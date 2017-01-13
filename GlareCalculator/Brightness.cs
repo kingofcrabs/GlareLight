@@ -14,6 +14,7 @@ namespace GlareCalculator
         public List<List<byte>> grayVals = new List<List<byte>>();
         public List<List<double>> orgVals = new List<List<double>>();
         public List<List<Color>> colorVals = new List<List<Color>>();
+        public int[] GrayLevelCounts = new int[256];
         public void Read(string sFile)
         {
             orgVals.Clear();
@@ -43,7 +44,10 @@ namespace GlareCalculator
         private List<List<byte>> Convert2Gray(List<List<double>> orgVals)
         {
             List<List<byte>> vals = new List<List<byte>>();
-
+            for(int i = 0; i< 255; i++)
+            {
+                GrayLevelCounts[i] = 0;
+            }
             byte[] map = new byte[256];
             long[] lCounts = new long[256];
             //each gray level count
@@ -60,6 +64,7 @@ namespace GlareCalculator
                 for (int x = 0; x < width; x++)
                 {
                     byte val = (byte)((orgVals[y][x] - min) / grayUnit);
+                    GrayLevelCounts[val]++;
                     thisLineGrayVals.Add(val);
                 }
                 vals.Add(thisLineGrayVals);
@@ -158,5 +163,17 @@ namespace GlareCalculator
             return double.Parse(s);
         }
 
+        internal List<ViewModels.GrayInfo> GetHistogram()
+        {
+            if (GrayLevelCounts.Count() == 0)
+                return null;
+
+            List<ViewModels.GrayInfo> grayInfos = new List<ViewModels.GrayInfo>();
+            for(int i = 0; i< 255; i++)
+            {
+                grayInfos.Add(new ViewModels.GrayInfo(i,GrayLevelCounts[i]));
+            }
+            return grayInfos;
+        }
     }
 }

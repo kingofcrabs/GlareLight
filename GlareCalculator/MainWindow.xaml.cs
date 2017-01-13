@@ -20,21 +20,20 @@ namespace GlareCalculator
 
         List<ShapeBase> shapes = new List<ShapeBase>();
         Brightness brightness = new Brightness();
-        MainWindowModel viewModel;
+        HistogramModel viewModel;
         public MainWindow()
         {
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
             myCanvas.onShapeChanged += myCanvas_onShapeChanged;
             InitToggleOperationDict();
-            viewModel = new ViewModels.MainWindowModel();
+            viewModel = new ViewModels.HistogramModel();
             DataContext = viewModel;
         }
 
         void myCanvas_onShapeChanged(List<ShapeBase> shapes)
         {
             this.shapes = shapes;
-            
         }
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -45,8 +44,6 @@ namespace GlareCalculator
             scrollViewer.PreviewMouseLeftButtonDown += scrollViewer_PreviewMouseLeftButtonDown;
             scrollViewer.PreviewMouseMove += ScrollViewer_PreviewMouseMove;
         }
-
-       
 
         void scrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -65,9 +62,6 @@ namespace GlareCalculator
             Point pt = e.GetPosition(myCanvas);
             myCanvas.LeftMouseUp(pt);
         }
-
-       
-
       
         private void SetInfo(string str, bool error)
         {
@@ -126,18 +120,7 @@ namespace GlareCalculator
             Configuration configWindow = new Configuration();
             configWindow.Show();
         }
-       
-
-        private void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
         #endregion
-
-        //Operation GetCurrentOperation()
-        //{
-
-        //}
 
         #region commands
 
@@ -215,7 +198,6 @@ namespace GlareCalculator
         }
         #endregion
 
-
         #region operations
 
         private Operation GetCurrentOperation()
@@ -228,8 +210,8 @@ namespace GlareCalculator
                 }
             }
             return Operation.none;
-            
         }
+
         Dictionary<Operation, ToggleButton> InitToggleOperationDict()
         {
             operation_ButtonControl.Add(Operation.polygon, btnPolygon);
@@ -259,6 +241,16 @@ namespace GlareCalculator
             myCanvas.CreateNewShape(op);
         }
 
+        private void btnHistogram_Click(object sender, RoutedEventArgs e)
+        {
+            OperationToggleButtonPressed(Operation.histogram);
+            viewModel.Histogram = brightness.GetHistogram();
+            bool isChecked = (bool)btnHistogram.IsChecked;
+
+            oxyplot.Visibility = isChecked ?System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            scrollViewer.Visibility = isChecked ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible;
+        }
+
         private void btnPolygon_Click(object sender, RoutedEventArgs e)
         {
             OperationToggleButtonPressed(Operation.polygon);
@@ -282,15 +274,7 @@ namespace GlareCalculator
             }
             myCanvas.SetBkGroundImage(bmpImage);
             OperationToggleButtonPressed(Operation.fakeColor);
-            
         }
-
-
-
         #endregion
-
-      
-
-       
     }
 }

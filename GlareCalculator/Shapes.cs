@@ -125,7 +125,6 @@ namespace GlareCalculator
             penWidth = Selected ? 2 : 1;
             drawingContext.DrawEllipse(null, new Pen(brush, penWidth), ptCircle, Radius, Radius);
         }
-
     }
 
     public class Polygon : ShapeBase
@@ -172,10 +171,7 @@ namespace GlareCalculator
                           ((pointX - endX) < (pointY - endY) * (startX - endX) / (startY - endY));
             }
             return inside;
-
         }
-
-
 
         public void RemoveLast()
         {
@@ -184,7 +180,6 @@ namespace GlareCalculator
             pts.RemoveAt(pts.Count - 1);
             Finished = false;
         }
-
 
         public void Enclose()
         {
@@ -261,6 +256,7 @@ namespace GlareCalculator
         polygon,
         circle,
         fakeColor,
-        select
+        select,
+        histogram
     };
 }

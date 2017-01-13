@@ -108,6 +108,9 @@
                 <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnFakeColor_Click" Name="btnFakeColor" Width="64">
                     <Image ToolTip="伪彩"  Source="/Images/fakeColor.jpg"/>
                 </ToggleButton>
+                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnHistogram_Click" Name="btnHistogram" Width="64">
+                    <Image ToolTip="直方图"  Source="/Images/histogram.png"/>
+                </ToggleButton>
             </WrapPanel>
             
             <StackPanel Orientation="Horizontal">
@@ -139,26 +142,20 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
-
                 </ScrollViewer>
-                    
             </Grid>
-            
         </StackPanel>
 
         <Grid Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"  >
-            <oxy:Plot Title="Histogram">
+            <oxy:Plot x:Name="oxyplot" Visibility="Hidden"  Title="Histogram">
                 <oxy:LinearBarSeries ItemsSource="{Binding Histogram}" DataFieldX="GrayLevel" DataFieldY="Count" Title="Gray&amp;Count" FillColor="#454CAF50" StrokeColor="#4CAF50" StrokeThickness="1" BarWidth="5"/>
             </oxy:Plot>
  
-            <ScrollViewer x:Name="scrollViewer"  Visibility="Hidden" VerticalScrollBarVisibility="Visible"
+            <ScrollViewer x:Name="scrollViewer"  VerticalScrollBarVisibility="Visible"
                    HorizontalScrollBarVisibility="Visible" VerticalAlignment="Top" >
                     <local:MyCanvas x:Name="myCanvas" Width="1362" Height="581" >
                     </local:MyCanvas>
-                </ScrollViewer>
-            
-            
-            
+            </ScrollViewer>
         </Grid>
         <StackPanel Name="infoStackPanel" Grid.Column="1" Grid.Row="3" Margin="1,0,10,5">
             <Label>信息：</Label>

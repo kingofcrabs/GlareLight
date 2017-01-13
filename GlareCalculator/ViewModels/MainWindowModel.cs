@@ -7,24 +7,28 @@ using OxyPlot.Axes;
 
 namespace GlareCalculator.ViewModels
 {
-     public class MainWindowModel:  INotifyPropertyChanged
+     public class HistogramModel:  INotifyPropertyChanged
     {
         private PlotModel plotModel;
         public PlotModel PlotModel
         {
             get { return plotModel; }
-            set { plotModel = value; OnPropertyChanged("PlotModel"); }
+            set { 
+                plotModel = value; 
+                OnPropertyChanged("PlotModel");
+            }
         }
 
-        public MainWindowModel()
+        public HistogramModel()
         {
             SetUpModel();
             Histogram = new List<GrayInfo>();
             for(int i = 0; i<= 255; i++)
             {
-                Histogram.Add(new GrayInfo(i, i));
+                Histogram.Add(new GrayInfo(i, 0));
             }
         }
+
 
         private void SetUpModel()
         {
@@ -48,7 +52,21 @@ namespace GlareCalculator.ViewModels
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public List<GrayInfo> Histogram { get; set; }
+        private List<GrayInfo> histogram;
+
+        public List<GrayInfo> Histogram
+        { 
+            get 
+            { 
+                return histogram;
+            }
+            set
+            {
+                histogram = value;
+                OnPropertyChanged("Histogram");
+            }
+
+        }
     }
 
      public class GrayInfo
