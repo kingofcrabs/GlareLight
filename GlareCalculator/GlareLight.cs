@@ -10,11 +10,11 @@ namespace GlareCalculator
 {
     class GlareLight
     {
-        double pixelUnit = 5.5 / 1000000;//um
-        double f = 8.0 / 1000; //mm
+        double pixelUnit = GlobalVars.Instance.CameraInfo.PixelLength / 1000000;//um
+        double f = GlobalVars.Instance.CameraInfo.Focus / 1000; //mm
         GuthIndexes guthIndexes = new GuthIndexes();
         //UGR La
-        public double Calculate(List<List<double>> vals,List<ShapeBase> shapes, ref List<GlareResult> results)
+        public double Calculate(List<List<double>> vals,List<ShapeBase> shapes, ref List<GlareResult> results,ref double LA)
         {
             double max = 0;
             List<Point> insidePolygonPts = new List<Point>();
@@ -38,7 +38,7 @@ namespace GlareCalculator
                 }
             }
 
-            double LA = Average(vals);
+            LA = Average(vals);
             double sum = 0;
             foreach(var pair in eachShape_pts)
             {
@@ -62,7 +62,6 @@ namespace GlareCalculator
                 }
                 results.Add(new GlareResult(totalLa / pts.Count, totalOmega, totalP / pts.Count));
             }
-
             return 8 * Math.Log(0.25 * sum / LA);
         }
 

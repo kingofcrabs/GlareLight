@@ -9,18 +9,18 @@ namespace GlareCalculator
     public class GlobalVars
     {
         private static GlobalVars _instance = null;
-        CameraInfo cameraInfo;
+        public CameraInfo CameraInfo { get; set; }
         public GlobalVars()
         {
             string cameraInfoFile = Utility.GetExeFolder() + "cameraInfo.xml";
             if(File.Exists(cameraInfoFile))
             {
                 string contend = File.ReadAllText(cameraInfoFile);
-                cameraInfo = Utility.Deserialize<CameraInfo>(contend);
+                CameraInfo = Utility.Deserialize<CameraInfo>(contend);
             }
             else
             {
-                cameraInfo = new CameraInfo();
+                CameraInfo = new CameraInfo();
             }
         }
 

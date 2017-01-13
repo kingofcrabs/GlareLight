@@ -89,7 +89,8 @@ namespace GlareCalculator
             OperationToggleButtonPressed(Operation.none); //reset
             GlareLight glareLight = new GlareLight();
             List<GlareResult> results = new List<GlareResult>();
-            var ugr = glareLight.Calculate(brightness.orgVals, shapes, ref results);
+            double LA = 0;
+            var ugr = glareLight.Calculate(brightness.orgVals, shapes, ref results, ref LA);
 
             DataTable  tbl = new DataTable("result");
             tbl.Columns.Add("ID", typeof(string));
@@ -107,6 +108,10 @@ namespace GlareCalculator
                     result.ω.ToString("0.000"),
                     result.P.ToString("0.00"));
             }
+            tbl.Rows.Add("Avg",
+                   LA.ToString("0.00"),
+                   "--",
+                   "--");
             lstviewResult.ItemsSource = tbl.DefaultView;
             txtUGR.Text = ugr.ToString("0.00");
         }
