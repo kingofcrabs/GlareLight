@@ -1,8 +1,11 @@
 ﻿using GlareCalculator.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -29,6 +32,7 @@ namespace GlareCalculator
             InitToggleOperationDict();
             viewModel = new ViewModels.HistogramModel();
             DataContext = viewModel;
+            grpShape.IsEnabled = false;
         }
 
         void myCanvas_onShapeChanged(List<ShapeBase> shapes)
@@ -72,6 +76,19 @@ namespace GlareCalculator
 
         
         #region button events
+        private void onThresholdChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if(!GlobalVars.Instance.ThresholdChangeFinished)
+                return;
+            GlobalVars.Instance.ThresholdChangeFinished = false;
+            GlobalVars.Instance.ThresholdChangeFinished = true;
+            
+        }
+        //private void btnSearch_Click(object sender, RoutedEventArgs e)
+        //{
+        //    EngineDll.IEngine engine = new EngineDll.IEngine();
+        //    engine.FindContours(brightness.pngFile, 3);
+        //}
         private void btnDel_Click(object sender, RoutedEventArgs e)
         {
             //if (lstRegions.SelectedIndex == -1)
@@ -90,7 +107,7 @@ namespace GlareCalculator
             GlareLight glareLight = new GlareLight();
             List<GlareResult> results = new List<GlareResult>();
             double LA = 0;
-            var ugr = glareLight.Calculate(brightness.orgVals, shapes, ref results, ref LA);
+            var ugr = glareLight.CalculateUGR(brightness.orgVals, shapes, ref results, ref LA);
 
             DataTable  tbl = new DataTable("result");
             tbl.Columns.Add("ID", typeof(string));
@@ -145,8 +162,23 @@ namespace GlareCalculator
 
             brightness.Read(fileDialog.FileName);
             SetInfo("Load brightness file successfully.", false);
+            grpShape.IsEnabled = true;
             BitmapImage bmpImage = ImageHelper.CreateImage(brightness.grayVals);
+            Save2File(bmpImage);
+            myCanvas.Width = (int)bmpImage.Width;
+            myCanvas.Height = (int)bmpImage.Height;
             myCanvas.SetBkGroundImage(bmpImage);
+        }
+
+        private void Save2File(BitmapImage bmpImage)
+        {
+            string pngFile = brightness.pngFile;
+            BitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bmpImage));
+            using (var fileStream = new System.IO.FileStream(pngFile, System.IO.FileMode.Create))
+            {
+                encoder.Save(fileStream);
+            }
         }
 
         private void OnOpenFile_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -223,12 +255,13 @@ namespace GlareCalculator
             operation_ButtonControl.Add(Operation.circle, btnCircle);
             operation_ButtonControl.Add(Operation.fakeColor, btnFakeColor);
             operation_ButtonControl.Add(Operation.select, btnSelect);
+            operation_ButtonControl.Add(Operation.histogram, btnHistogram);
             return operation_ButtonControl;
         }
         private void OperationToggleButtonPressed(Operation op)
         {
             List<Operation> operations = new List<Operation>(){
-                Operation.polygon,Operation.circle,Operation.select,Operation.fakeColor
+                Operation.polygon,Operation.circle,Operation.select,Operation.fakeColor,Operation.histogram
             };
             foreach(Operation tmpOp in operations)
             {
@@ -250,9 +283,14 @@ namespace GlareCalculator
         {
             OperationToggleButtonPressed(Operation.histogram);
             viewModel.Histogram = brightness.GetHistogram();
-            bool isChecked = (bool)btnHistogram.IsChecked;
+            SwitchView();
+          
+        }
 
-            oxyplot.Visibility = isChecked ?System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+        private void SwitchView()
+        {
+            bool isChecked = (bool)btnHistogram.IsChecked;
+            oxyplot.Visibility = isChecked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
             scrollViewer.Visibility = isChecked ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible;
         }
 
@@ -268,18 +306,28 @@ namespace GlareCalculator
 
         private void btnFakeColor_Click(object sender, RoutedEventArgs e)
         {
+            OperationToggleButtonPressed(Operation.fakeColor);
+            SwitchView();
             BitmapImage bmpImage;
             if ((bool)btnFakeColor.IsChecked)
             {
-                bmpImage = ImageHelper.CreateImage(brightness.colorVals);
+                bmpImage = ImageHelper.CreateImage(brightness.pngFile);
             }
             else
             {
                 bmpImage = ImageHelper.CreateImage(brightness.grayVals);
             }
             myCanvas.SetBkGroundImage(bmpImage);
-            OperationToggleButtonPressed(Operation.fakeColor);
+            
         }
         #endregion
+
+     
+
+       
     }
+
+   
+      
+    
 }

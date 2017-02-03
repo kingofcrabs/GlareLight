@@ -5,6 +5,16 @@
         xmlns:oxy="http://oxyplot.org/wpf"
         Title="GlareCalculator" Icon="Images/glare.jpg" Height="700" Width="1000">
     <Window.Resources>
+        <Style TargetType="Slider" x:Key="enableDisableStyle">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsChecked, ElementName=autoThreshold}" Value="True">
+                    <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsChecked, ElementName=manualThreshold}" Value="True">
+                    <Setter Property="IsEnabled" Value="True" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         <RoutedUICommand x:Key="DeleteShape" Text="Delete." />
         <RoutedUICommand x:Key="CompletePolygon" Text="Finish Editing the polygon." />
     </Window.Resources>
@@ -89,62 +99,94 @@
                     <TextBlock FontSize="16" TextAlignment="Center" Margin="3,0,0,0">配置</TextBlock>
                 </StackPanel>
             </Button>
+
+            <!--<Button Name="btnSearch" Click="btnSearch_Click" ToolTip="查找光源.">
+                <StackPanel Orientation="Vertical" >
+                    <Image Source="/Images/search.png"  Height="55"/>
+                    <TextBlock FontSize="16" TextAlignment="Center" Margin="3,0,0,0">找光源</TextBlock>
+                </StackPanel>
+            </Button>-->
         </StackPanel>
-        <StackPanel Name="operations" Grid.Row="2">
-            <Label>操作：</Label>
-            <WrapPanel Name="grpShape">
-                <ToggleButton ToolTip="多边形" Style="{StaticResource ToggleButtonStyle1}" Click="btnPolygon_Click" Name="btnPolygon" Width="64">
-                    <Image  Source="/Images/polygon.png"/>
-                </ToggleButton>
-                <ToggleButton ToolTip="圆" Style="{StaticResource ToggleButtonStyle1}" Click="btnCircle_Click" Name="btnCircle" Width="64">
-                    <Image  Source="/Images/circle.png"/>
-                </ToggleButton>
-                <!--<ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnMove_Click"  Name="btnMove" Width="64">
+
+        <TabControl Grid.Row="2" Grid.RowSpan="2">
+            <TabItem Header="UGR">
+                <StackPanel Name="operations" Grid.Row="2">
+                    <Label>操作：</Label>
+                    <WrapPanel Name="grpShape">
+                        <ToggleButton ToolTip="多边形" Style="{StaticResource ToggleButtonStyle1}" Click="btnPolygon_Click" Name="btnPolygon" Width="64">
+                            <Image  Source="/Images/polygon.png"/>
+                        </ToggleButton>
+                        <ToggleButton ToolTip="圆" Style="{StaticResource ToggleButtonStyle1}" Click="btnCircle_Click" Name="btnCircle" Width="64">
+                            <Image  Source="/Images/circle.png"/>
+                        </ToggleButton>
+                        <!--<ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnMove_Click"  Name="btnMove" Width="64">
                     <Image  Source="/Images/move.png"/>
                 </ToggleButton>-->
-                <ToggleButton ToolTip="选中" Style="{StaticResource ToggleButtonStyle1}" Click="btnSelect_Click" Name="btnSelect" Width="64">
-                    <Image  Source="/Images/selection.png"/>
-                </ToggleButton>
-                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnFakeColor_Click" Name="btnFakeColor" Width="64">
-                    <Image ToolTip="伪彩"  Source="/Images/fakeColor.jpg"/>
-                </ToggleButton>
-                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnHistogram_Click" Name="btnHistogram" Width="64">
-                    <Image ToolTip="直方图"  Source="/Images/histogram.png"/>
-                </ToggleButton>
-            </WrapPanel>
-            
-            <StackPanel Orientation="Horizontal">
-                <Button Name="btnCalculateUGR" Width="64"  Click="btnCalculateUGR_Click" ToolTip="计算UGR">
-                    <StackPanel>
-                    <Image  Source="/Images/calculator.jpg"/>
-                    </StackPanel>
-                </Button>
-                <Label VerticalAlignment="Center" FontSize="32">UGR:</Label>
-                <TextBox Name="txtUGR" FontSize="32" VerticalAlignment="Center" Text="" Width="100" Margin="0,0,10,0"></TextBox>
-            </StackPanel>
-           
+                        <ToggleButton ToolTip="选中" Style="{StaticResource ToggleButtonStyle1}" Click="btnSelect_Click" Name="btnSelect" Width="64">
+                            <Image  Source="/Images/selection.png"/>
+                        </ToggleButton>
+                        <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnFakeColor_Click" Name="btnFakeColor" Width="64">
+                            <Image ToolTip="伪彩"  Source="/Images/fakeColor.jpg"/>
+                        </ToggleButton>
+                        <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnHistogram_Click" Name="btnHistogram" Width="64">
+                            <Image ToolTip="直方图"  Source="/Images/histogram.png" Height="50" Width="54"/>
+                        </ToggleButton>
+                    </WrapPanel>
 
-            <Grid Name="resultGrid" Margin="0,5,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="30"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Label>UGR区域信息：</Label>
-                <ScrollViewer x:Name="scrollViewerResult" Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                    <StackPanel Orientation="Horizontal">
+                        <Button Name="btnCalculateUGR" Width="64"  Click="btnCalculateUGR_Click" ToolTip="计算UGR">
+                            <StackPanel>
+                                <Image  Source="/Images/calculator.jpg"/>
+                            </StackPanel>
+                        </Button>
+                        <Label VerticalAlignment="Center" FontSize="32">UGR:</Label>
+                        <TextBox Name="txtUGR" FontSize="32" VerticalAlignment="Center" Text="" Width="100" Margin="0,0,10,0"></TextBox>
+                    </StackPanel>
+
+
+                    <Grid Name="resultGrid" Margin="0,5,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Label>UGR区域信息：</Label>
+                        <ScrollViewer x:Name="scrollViewerResult" Grid.Row="1" VerticalScrollBarVisibility="Auto"
                    HorizontalScrollBarVisibility="Auto" VerticalAlignment="Top" >
-                    <ListView Name="lstviewResult"  FontFamily="SimSun" >
-                        <ListView.View>
-                            <GridView x:Name="gridView1">
-                                <GridViewColumn Header="ID" Width="30" DisplayMemberBinding="{Binding Path=ID}"></GridViewColumn>
-                                <GridViewColumn Header="La" Width="60" DisplayMemberBinding="{Binding Path=LA}"></GridViewColumn>
-                                <GridViewColumn Header="ω"  Width="60" DisplayMemberBinding="{Binding Path=Omega}"></GridViewColumn>
-                                <GridViewColumn Header="P"  Width="60" DisplayMemberBinding="{Binding Path=P}"></GridViewColumn>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
-                </ScrollViewer>
-            </Grid>
-        </StackPanel>
+                            <ListView Name="lstviewResult"  FontFamily="SimSun" >
+                                <ListView.View>
+                                    <GridView x:Name="gridView1">
+                                        <GridViewColumn Header="ID" Width="30" DisplayMemberBinding="{Binding Path=ID}"></GridViewColumn>
+                                        <GridViewColumn Header="La" Width="60" DisplayMemberBinding="{Binding Path=LA}"></GridViewColumn>
+                                        <GridViewColumn Header="ω"  Width="60" DisplayMemberBinding="{Binding Path=Omega}"></GridViewColumn>
+                                        <GridViewColumn Header="P"  Width="60" DisplayMemberBinding="{Binding Path=P}"></GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                        </ScrollViewer>
+                    </Grid>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="TI" />
+            <TabItem Header="智能查找">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="autoThreshold" IsChecked="True" >自动阙值</RadioButton>
+                        <RadioButton x:Name="manualThreshold" Margin="10,0,0,0">手动阙值</RadioButton>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1">
+                        <Slider Name="threshold" Style="{StaticResource enableDisableStyle}"  Minimum="0" Maximum="255" ValueChanged="onThresholdChanged" ></Slider>
+                    </StackPanel>
+                </Grid>
+                
+            </TabItem>
+        </TabControl>
+       
 
         <Grid Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"  >
             <oxy:Plot x:Name="oxyplot" Visibility="Hidden"  Title="Histogram">
@@ -157,6 +199,7 @@
                     </local:MyCanvas>
             </ScrollViewer>
         </Grid>
+        
         <StackPanel Name="infoStackPanel" Grid.Column="1" Grid.Row="3" Margin="1,0,10,5">
             <Label>信息：</Label>
             <TextBox Name="txtInfo" Height="100" Margin="0,0,0,5" TextWrapping="Wrap"></TextBox>

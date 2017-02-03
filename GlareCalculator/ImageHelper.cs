@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineDll;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -182,26 +183,15 @@ namespace GlareCalculator
             }
         }
 
-        static public BitmapImage CreateImage(List<List<Color>> colors)
+        static public BitmapImage CreateImage(string fileName)
         {
-            int height = colors.Count;
-            int width = 100 * ((colors[0].Count + 99) / 100);
-            int orgWidth = colors[0].Count;
-           
-            var b = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-            LockBitmap lockBitmap = new LockBitmap(b);
-            lockBitmap.LockBits();
-            //lockBitmap.SetPixel(100, 100, Color.White);
-            for (int y = 0; y < lockBitmap.Height; y++)
-            {
-                for (int x = 0; x < orgWidth; x++)
-                {
-                    lockBitmap.SetPixel(x, y, colors[y][x]);
-                }
-            }
-            lockBitmap.UnlockBits();
-            b.Save("d:\\test.png");
-            return b.ToBitmapImage();
+            IEngine engineDll = new IEngine();
+            DirectoryInfo DirectoryInfo = new DirectoryInfo(fileName);
+            string parentDirectory = DirectoryInfo.Parent.FullName;
+            string colorImgPath = parentDirectory + "\\color.png";
+            engineDll.Convert2PseudoColor(fileName, colorImgPath);
+            Bitmap bmp = new Bitmap(colorImgPath);
+            return bmp.ToBitmapImage();
         }
 
 

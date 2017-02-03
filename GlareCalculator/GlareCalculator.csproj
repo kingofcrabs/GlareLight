@@ -25,6 +25,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -34,6 +35,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>glare.ico</ApplicationIcon>
@@ -74,7 +76,6 @@
     </Compile>
     <Compile Include="GlobalVars.cs" />
     <Compile Include="ImageHelper.cs" />
-    <Compile Include="PseudoColor.cs" />
     <Compile Include="Shapes.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="ViewModels\MainWindowModel.cs" />
@@ -162,6 +163,15 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="glare.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EngineDll\EngineDll.vcxproj">
+      <Project>{9f46951f-d766-4801-9aed-44dc5f017eb9}</Project>
+      <Name>EngineDll</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\search.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

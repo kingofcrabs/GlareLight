@@ -10,34 +10,14 @@ namespace GlareCalculator
 {
     class GlareLight
     {
-        double pixelUnit = GlobalVars.Instance.CameraInfo.PixelLength / 1000000;//um
-        double f = GlobalVars.Instance.CameraInfo.Focus / 1000; //mm
+        double pixelUnit = GlobalVars.Instance.CameraInfo.PixelLength / 1000000.0;//um
+        double f = GlobalVars.Instance.CameraInfo.Focus / 1000.0; //mm
         GuthIndexes guthIndexes = new GuthIndexes();
         //UGR La
-        public double Calculate(List<List<double>> vals,List<ShapeBase> shapes, ref List<GlareResult> results,ref double LA)
+        public double CalculateUGR(List<List<double>> vals,List<ShapeBase> shapes, ref List<GlareResult> results,ref double LA)
         {
-            double max = 0;
             List<Point> insidePolygonPts = new List<Point>();
-            Dictionary<ShapeBase, List<Point>> eachShape_pts = new Dictionary<ShapeBase, List<Point>>();
-            shapes.ForEach(x => eachShape_pts.Add(x, new List<Point>()));
-            for(int y = 0 ; y< vals.Count; y++)
-            {
-                for(int x = 0; x< vals[y].Count; x++)
-                {
-                    if (vals[y][x] > max)
-                        max = vals[y][x];
-                    Point pt = new Point(x, y);
-                    foreach(ShapeBase shape in shapes)
-                    {
-                        if(shape.PtIsInside(pt))
-                        {
-                            eachShape_pts[shape].Add(pt);
-                            break;
-                        }
-                    }
-                }
-            }
-
+            Dictionary<ShapeBase, List<Point>> eachShape_pts = GetPtsInShapes(vals, shapes);
             LA = Average(vals);
             double sum = 0;
             foreach(var pair in eachShape_pts)
@@ -63,6 +43,57 @@ namespace GlareCalculator
                 results.Add(new GlareResult(totalLa / pts.Count, totalOmega, totalP / pts.Count));
             }
             return 8 * Math.Log(0.25 * sum / LA);
+        }
+
+        public double CalculateTI(List<List<double>> vals,List<ShapeBase> shapes, ref double LA)
+        {
+            //Lv = c*Evert/(θ^n)
+            //Evert = ΣL(i,j)*Ω(i,j)*cosθ
+            List<Point> insidePolygonPts = new List<Point>();
+            Dictionary<ShapeBase, List<Point>> eachShape_pts = GetPtsInShapes(vals, shapes);
+            double sum = 0;
+            foreach (var pair in eachShape_pts)
+            {
+                var pts = pair.Value;
+                if (pts.Count == 0)
+                    continue;
+                
+                foreach (Point pt in pts)
+                {
+                    double L = vals[(int)pt.Y][(int)pt.X];
+                    double ω = 0;
+                    double cosθ = 0;
+                    CalculateOmegaAndTheta(vals, (int)pt.X, (int)pt.Y, ref ω, ref cosθ);
+                    sum += L * ω * cosθ;
+                }
+            }
+            return sum;
+        }
+        
+
+        private Dictionary<ShapeBase, List<Point>> GetPtsInShapes(List<List<double>> vals, List<ShapeBase> shapes)
+        {
+            double max = 0;
+            Dictionary<ShapeBase, List<Point>> eachShape_pts = new Dictionary<ShapeBase, List<Point>>();
+            shapes.ForEach(x => eachShape_pts.Add(x, new List<Point>()));
+            for (int y = 0; y < vals.Count; y++)
+            {
+                for (int x = 0; x < vals[y].Count; x++)
+                {
+                    if (vals[y][x] > max)
+                        max = vals[y][x];
+                    Point pt = new Point(x, y);
+                    foreach (ShapeBase shape in shapes)
+                    {
+                        if (shape.PtIsInside(pt))
+                        {
+                            eachShape_pts[shape].Add(pt);
+                            break;
+                        }
+                    }
+                }
+            }
+            return eachShape_pts;
         }
 
         
@@ -105,7 +136,18 @@ namespace GlareCalculator
             p = guthIndexes.GetVal(T2R, H2R);
         }
 
-
+        void CalculateOmegaAndTheta(List<List<double>> vals, int x, int y, ref double ω, ref double cosθ)
+        {
+            int width = vals[0].Count;
+	        int height = vals.Count;
+	        double xDis = Math.Abs(x - width / 2) * pixelUnit;
+            double yDis = Math.Abs(y - height / 2) * pixelUnit;
+	        double dis = Math.Sqrt(xDis*xDis + yDis * yDis);
+            double r = Math.Sqrt(xDis * xDis + yDis * yDis + f * f);
+            cosθ = f / r;
+	        double Ap = pixelUnit * pixelUnit * cosθ;
+	        ω = Ap / (r*r);
+        }
 
         void CalculateOmegaAndGuth(List<List<double>> vals, int x, int y, ref double ω, ref double p)
         {

@@ -77,7 +77,9 @@ namespace EngineDll
 		IEngine();
 		~IEngine();
 		cv::Rect2f Convert2Rect2f(MRect^ rc);
+		void Convert2PseudoColor(System::String^ sOrgFile, System::String^ sDestFile);
 		AnalysisResult^ Analysis(System::String^ sFile, array<MRect^>^ rects);
+		void FindContours(System::String^ sFile, int cnt2Find);
 	private :
 		std::string IEngine::WStringToString(const std::wstring &wstr);
 		EngineImpl* m_EngineImpl;

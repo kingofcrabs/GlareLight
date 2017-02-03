@@ -45,4 +45,19 @@ namespace EngineDll
 		return gcnew AnalysisResult(gVal);
 	}
 
+	void IEngine::Convert2PseudoColor(System::String^ sOrgFile, System::String^ sDestFile)
+	{
+		std::string nativeSourceFileName = msclr::interop::marshal_as< std::string >(sOrgFile);
+		std::string nativeDestFileName = msclr::interop::marshal_as< std::string >(sDestFile);
+		m_EngineImpl->Convert2PesudoColor(nativeSourceFileName, nativeDestFileName);
+	}
+
+
+	void IEngine::FindContours(System::String^ sFile, int cnt2Find)
+	{
+		std::string nativeSourceFileName = msclr::interop::marshal_as< std::string >(sFile);
+		std::vector<std::vector<cv::Point>> contours;
+		m_EngineImpl->FindContours(nativeSourceFileName, contours, 100, 1000, 3);
+	}
+
 }

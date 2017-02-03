@@ -35,25 +35,36 @@ void GothroughImage(Mat& src)
 	return;
 }
 
-//void  EngineImpl::FindContours(const cv::Mat& thresholdImg,
-//	std::vector<std::vector<cv::Point>
-//	>& contours,
-//	int min, int max)
-//{
-//	std::vector< std::vector<cv::Point> > allContours;
-//
-//	cv::findContours(thresholdImg, allContours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
-//	contours.clear();
-//	for (size_t i = 0; i<allContours.size(); i++)
-//	{
-//		int contourSize = allContours[i].size();
-//		
-//		if (contourSize > min && contourSize < max)
-//		{
-//			contours.push_back(allContours[i]);
-//		}
-//	}
-//}
+void  EngineImpl::FindContours(string sFile,
+	std::vector<std::vector<cv::Point>
+	>& contours,
+	int min, int max, int cnt2Find)
+{
+	std::vector< std::vector<cv::Point> > allContours;
+	auto img = cv::imread(sFile,0);
+	Mat thresholdImg;
+	cv::adaptiveThreshold(img, thresholdImg, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 7, 5);
+	
+	cv::findContours(thresholdImg, allContours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+	contours.clear();
+	RNG rng(12345);
+	for (size_t i = 0; i<allContours.size(); i++)
+	{
+		int contourSize = allContours[i].size();
+		
+		if (contourSize > min && contourSize < max)
+		{
+			contours.push_back(allContours[i]);
+		}
+	}
+	Mat drawing = Mat::zeros(thresholdImg.size(), CV_8UC3);
+	for (int i = 0; i< contours.size(); i++)
+	{
+		Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+		drawContours(drawing, contours, i, color, 2, 8);
+	}
+	cv::imshow("test", drawing);
+}
 
 std::string WStringToString(const std::wstring &wstr)
 {
@@ -61,7 +72,6 @@ std::string WStringToString(const std::wstring &wstr)
 	std::copy(wstr.begin(), wstr.end(), str.begin());
 	return str;
 }
-
 
 
 double  EngineImpl::GetDistance(double x1, double y1, double x2, double y2)
@@ -82,6 +92,17 @@ double EngineImpl::CalculateGuthPosition(int x, int y)
 	double T2R = x / f;
 	return 1;
 }
+
+
+
+void EngineImpl::Convert2PesudoColor(std::string srcFile, std::string destFile)
+{
+	Mat orgImg = imread(srcFile);
+	Mat color;
+	applyColorMap(orgImg, color, COLORMAP_JET);
+	imwrite(destFile,color);
+}
+
 
 double EngineImpl::CalculateOmega(int x, int y)
 {

@@ -13,6 +13,7 @@ namespace GlareCalculator
         public GlobalVars()
         {
             string cameraInfoFile = Utility.GetExeFolder() + "cameraInfo.xml";
+            ThresholdChangeFinished = true;
             if(File.Exists(cameraInfoFile))
             {
                 string contend = File.ReadAllText(cameraInfoFile);
@@ -33,6 +34,8 @@ namespace GlareCalculator
                 return _instance;
             }
         }
+
+        public bool ThresholdChangeFinished { get; set; }
     }
 
     [Serializable]
