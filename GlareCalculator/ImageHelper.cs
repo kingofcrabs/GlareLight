@@ -194,6 +194,23 @@ namespace GlareCalculator
             return bmp.ToBitmapImage();
         }
 
+        static public BitmapImage CreateImage(List<byte> vals, int width, int height)
+        {
+            var b = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            LockBitmap lockBitmap = new LockBitmap(b);
+            lockBitmap.LockBits();
+            int index = 0;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    byte val = vals[index++];
+                    lockBitmap.SetPixel(x, y, Color.FromArgb(val, val, val));
+                }
+            }
+            lockBitmap.UnlockBits();
+            return b.ToBitmapImage();
+        }
 
         static public BitmapImage CreateImage(List<List<byte>> vals)
         {

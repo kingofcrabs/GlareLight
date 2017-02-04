@@ -13,8 +13,11 @@ namespace GlareCalculator
     {
         public List<List<byte>> grayVals = new List<List<byte>>();
         public List<List<double>> orgVals = new List<List<double>>();
+        public byte[] grayValsInArray;
         public string pngFile;
         public int[] GrayLevelCounts = new int[256];
+        public int Width { get; set; }
+        public int Height { get; set; }
         public void Read(string sFile)
         {
             pngFile = sFile.Replace(".txt",".png");
@@ -53,21 +56,24 @@ namespace GlareCalculator
             byte[] map = new byte[256];
             long[] lCounts = new long[256];
             //each gray level count
-            int height = orgVals.Count;
-            int width = orgVals[0].Count;
+            Height = orgVals.Count;
+            Width = orgVals[0].Count;
             List<double> maxList = orgVals.Select(l => l.Max()).ToList();
             List<double> minList = orgVals.Select(l => l.Min()).ToList();
             double max = maxList.Max();
             double min = minList.Min();
             double grayUnit = (max - min) / 255;
-            for (int y = 0; y < height; y++)
+            grayValsInArray = new byte[Height * Width];
+            int pixelCnt = 0;
+            for (int y = 0; y < Height; y++)
             {
                 List<byte> thisLineGrayVals = new List<byte>();
-                for (int x = 0; x < width; x++)
+                for (int x = 0; x < Width; x++)
                 {
                     byte val = (byte)((orgVals[y][x] - min) / grayUnit);
                     GrayLevelCounts[val]++;
                     thisLineGrayVals.Add(val);
+                    grayValsInArray[pixelCnt++] = val;
                 }
                 vals.Add(thisLineGrayVals);
             }
@@ -132,6 +138,17 @@ namespace GlareCalculator
                 grayInfos.Add(new ViewModels.GrayInfo(i,GrayLevelCounts[i]));
             }
             return grayInfos;
+        }
+
+        internal List<byte> Threshold(double thresholdVal)
+        {
+            List<byte> newVals = new List<byte>();
+            byte val = (byte)thresholdVal;
+            for(int i = 0; i< grayValsInArray.Length; i++)
+            {
+                newVals.Add(grayValsInArray[i] > val ? (byte)255 : (byte)0);
+            }
+            return newVals;
         }
     }
 }

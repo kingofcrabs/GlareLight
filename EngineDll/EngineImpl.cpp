@@ -66,6 +66,16 @@ void  EngineImpl::FindContours(string sFile,
 	cv::imshow("test", drawing);
 }
 
+
+void EngineImpl::FindContoursRaw(uchar* pdata, int width, int height,
+	std::vector<std::vector<cv::Point>
+	>& contours,
+	int min, int max, int cnt2Find)
+{
+	Mat img = Mat(height, width, CV_8UC1, pdata);
+	
+}
+
 std::string WStringToString(const std::wstring &wstr)
 {
 	std::string str(wstr.length(), ' ');
@@ -125,3 +135,14 @@ double EngineImpl::CalculateGlare(std::string sFile, std::vector<cv::Rect2f> rec
 	return 5;
 }
 
+int EngineImpl::AdaptiveThreshold(uchar* pdata,int width, int height, std::vector<uchar>& vector)
+{
+	Mat img = Mat(height, width, CV_8UC1, pdata);
+	Mat thresholdImg;
+	int thresholdVal = cv::threshold(img, thresholdImg, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+	//cv::adaptiveThreshold(img, thresholdImg, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 7, 5);
+	imshow("adaptive", thresholdImg);
+	vector.resize(img.rows*img.cols);
+	vector.assign(thresholdImg.datastart, thresholdImg.dataend);
+	return thresholdVal;
+}

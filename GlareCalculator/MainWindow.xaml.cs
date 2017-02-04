@@ -24,6 +24,7 @@ namespace GlareCalculator
         List<ShapeBase> shapes = new List<ShapeBase>();
         Brightness brightness = new Brightness();
         HistogramModel viewModel;
+        EngineDll.IEngine engine = null;
         public MainWindow()
         {
             InitializeComponent();
@@ -33,6 +34,7 @@ namespace GlareCalculator
             viewModel = new ViewModels.HistogramModel();
             DataContext = viewModel;
             grpShape.IsEnabled = false;
+            engine = new EngineDll.IEngine();
         }
 
         void myCanvas_onShapeChanged(List<ShapeBase> shapes)
@@ -76,11 +78,31 @@ namespace GlareCalculator
 
         
         #region button events
+
+        private void OnClickThreshold(object sender, RoutedEventArgs e)
+        {
+            if (!GlobalVars.Instance.ThresholdChangeFinished)
+                return;
+
+            GlobalVars.Instance.ThresholdChangeFinished = false;
+           
+            List<byte> thresholdData = new List<byte>();
+            int val = engine.AdaptiveThreshold(brightness.grayValsInArray, brightness.Width, brightness.Height, ref thresholdData);
+
+            sliderThreshold.Value = val;
+            BitmapImage bmpImage = ImageHelper.CreateImage(thresholdData,brightness.Width,brightness.Height);
+            myCanvas.SetBkGroundImage(bmpImage);
+            GlobalVars.Instance.ThresholdChangeFinished = true;
+        }
+
         private void onThresholdChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if(!GlobalVars.Instance.ThresholdChangeFinished)
                 return;
             GlobalVars.Instance.ThresholdChangeFinished = false;
+            List<byte> thresholdData = brightness.Threshold(sliderThreshold.Value);
+            BitmapImage bmpImage = ImageHelper.CreateImage(thresholdData, brightness.Width, brightness.Height);
+            myCanvas.SetBkGroundImage(bmpImage);
             GlobalVars.Instance.ThresholdChangeFinished = true;
             
         }
@@ -321,6 +343,8 @@ namespace GlareCalculator
             
         }
         #endregion
+
+       
 
      
 

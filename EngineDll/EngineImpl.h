@@ -21,6 +21,12 @@ public:
 		std::vector<std::vector<cv::Point>
 		>& contours,
 		int min, int max, int cnt2Find);
+
+	void  FindContoursRaw(uchar* pdata, int width, int height,
+		std::vector<std::vector<cv::Point>
+		>& contours,
+		int min, int max, int cnt2Find);
+	int AdaptiveThreshold(uchar*, int width, int height,std::vector<uchar>& vector);
 private:
 	double CalculateOmega(int x, int y);
 	double CalculateGuthPosition(int x, int y);
