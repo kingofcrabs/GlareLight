@@ -195,8 +195,11 @@
        
 
         <Grid Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"  >
-            <oxy:Plot x:Name="oxyplot" Visibility="Hidden"  Title="Histogram">
+            <oxy:Plot x:Name="plot1" Visibility="Hidden"  Title="Histogram">
                 <oxy:LinearBarSeries ItemsSource="{Binding Histogram}" DataFieldX="GrayLevel" DataFieldY="Count" Title="Gray&amp;Count" FillColor="#454CAF50" StrokeColor="#4CAF50" StrokeThickness="1" BarWidth="5"/>
+                <oxy:Plot.Annotations>
+                    <oxy:TextAnnotation TextColor="Black" FontSize="20" Text="{Binding Desc}" TextPosition="{Binding AnnotationPosition}" />
+                </oxy:Plot.Annotations>
             </oxy:Plot>
  
             <ScrollViewer x:Name="scrollViewer"  VerticalScrollBarVisibility="Visible"

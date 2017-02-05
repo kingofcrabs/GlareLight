@@ -35,6 +35,7 @@ namespace GlareCalculator
             InitToggleOperationDict();
             viewModel = new ViewModels.HistogramModel();
             DataContext = viewModel;
+            
             grpShape.IsEnabled = false;
             engine = new EngineDll.IEngine();
         }
@@ -185,6 +186,7 @@ namespace GlareCalculator
             SetInfo("成功读入亮度文件。", false);
             tabs.IsEnabled = true;
             grpShape.IsEnabled = true;
+            viewModel.Histogram = new List<GrayInfo>();
             BitmapImage bmpImage = ImageHelper.CreateImage(brightness.grayVals);
             Save2File(bmpImage);
             myCanvas.Width = (int)bmpImage.Width;
@@ -312,6 +314,7 @@ namespace GlareCalculator
         {
             OperationToggleButtonPressed(Operation.histogram);
             viewModel.Histogram = brightness.GetHistogram();
+            //viewModel.UpdateHint(plot1);
             SwitchView();
           
         }
@@ -319,7 +322,7 @@ namespace GlareCalculator
         private void SwitchView()
         {
             bool isChecked = (bool)btnHistogram.IsChecked;
-            oxyplot.Visibility = isChecked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            plot1.Visibility = isChecked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
             scrollViewer.Visibility = isChecked ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible;
         }
 
