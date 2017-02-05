@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "IEngine.h"
 #include <msclr\marshal_cppstd.h>
-#include "ArrayPinHandlerRAII.h"
 using namespace System;
 using namespace System::IO;
 using namespace System::Collections::Generic;
@@ -54,16 +53,16 @@ namespace EngineDll
 		m_EngineImpl->Convert2PesudoColor(nativeSourceFileName, nativeDestFileName);
 	}
 
-	void IEngine::FindContours(array<uchar>^ arr, int width, int height, int cnt2Find)
+	/*void IEngine::FindContours(array<uchar>^ arr, int width, int height, int cnt2Find)
 	{
 		pin_ptr<uchar> pin = &arr[0];
 		uchar * pData = pin;
 		std::vector<std::vector<cv::Point>> contours;
 			
 		m_EngineImpl->FindContoursRaw(pData, width, height, contours, 100, 1000, 3);
-	}
+	}*/
 
-	int IEngine::AdaptiveThreshold(array<uchar>^ src, int width, int height, List<uchar>^% afterThresholdData)
+	/*int IEngine::AdaptiveThreshold(array<uchar>^ src, int width, int height, List<uchar>^% afterThresholdData)
 	{
 		pin_ptr<uchar> pin = &src[0];
 		uchar * pData = pin;
@@ -71,12 +70,34 @@ namespace EngineDll
 		int val = m_EngineImpl->AdaptiveThreshold(pData, width,height, afterThresholdDataInVec);
 		afterThresholdData = Copy2List(afterThresholdDataInVec);
 		return val;
+	}*/
+
+	int IEngine::SearchLights(array<uchar>^ src, int width, int height, List<List<MPoint^>^>^% contours)
+	{
+		pin_ptr<uchar> pin = &src[0];
+		uchar * pData = pin;
+		//std::vector<uchar> afterThresholdDataInVec;
+		std::vector<std::vector<cv::Point>> contoursInVec;
+		int val = m_EngineImpl->SearchLights(pData, width, height, 20, 1000, contoursInVec);
+		//afterThresholdData = Copy2List(afterThresholdDataInVec);
+		for (int i = 0; i < contoursInVec.size(); i++)
+		{
+			List<MPoint^>^ pts = gcnew List<MPoint^>();
+			for (int j = 0; j < contoursInVec[i].size(); j++)
+			{
+				cv::Point& pt = contoursInVec[i][j];
+				pts->Add(gcnew MPoint(pt.x, pt.y));
+			}
+			contours->Add(pts);
+		}
+		return val;
 	}
 
 
-	List<uchar>^  IEngine::Copy2List(std::vector<uchar> vector)
+
+	template<typename T>  List<T>^  IEngine::Copy2List(std::vector<T> vector)
 	{
-		List<uchar>^ arrayList = gcnew List<uchar>();
+		List<T>^ arrayList = gcnew List<T>();
 		for (int i = 0; i < vector.size(); i++)
 		{
 			arrayList->Add(vector[i]);
@@ -84,11 +105,11 @@ namespace EngineDll
 		return arrayList;
 	}
 
-	void IEngine::FindContours(System::String^ sFile, int cnt2Find)
+	/*void IEngine::FindContours(System::String^ sFile, int cnt2Find)
 	{
 		std::string nativeSourceFileName = msclr::interop::marshal_as< std::string >(sFile);
 		std::vector<std::vector<cv::Point>> contours;
 		m_EngineImpl->FindContours(nativeSourceFileName, contours, 100, 1000, 3);
-	}
+	}*/
 
 }

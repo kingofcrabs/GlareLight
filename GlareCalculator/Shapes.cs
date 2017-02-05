@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineDll;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -138,6 +139,15 @@ namespace GlareCalculator
             currentPt = invalidPt;
             Selected = true;
             Finished = false;
+        }
+
+        public Polygon(List<MPoint> pts)
+        {
+            this.pts = new List<Point>();
+            pts.ForEach( p=>this.pts.Add(new Point(p.x,p.y)));
+            currentPt = invalidPt;
+            Selected = false;
+            Finished = true;
         }
 
         public override bool PtIsInside(Point pt)

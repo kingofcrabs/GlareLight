@@ -177,12 +177,13 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal">
-                        <RadioButton x:Name="autoThreshold" Click="OnClickThreshold" IsChecked="True" >自动阙值</RadioButton>
-                        <RadioButton x:Name="manualThreshold" Click="OnClickThreshold" Margin="10,0,0,0">手动阙值</RadioButton>
+                        <Button Name="btnSearchRegions" Click="btnSearchRegions_Click">查找区域</Button>
+                        <TextBox Name="txtThreshold" Width="60" Margin="10,0,0,0" IsEnabled="True"></TextBox>
                     </StackPanel>
                     <StackPanel Grid.Row="1">
-                        <Slider Name="sliderThreshold" Style="{StaticResource enableDisableStyle}"  Minimum="0" Maximum="255" ValueChanged="onThresholdChanged" ></Slider>
+                        
                     </StackPanel>
+                    
                 </Grid>
                 
             </TabItem>

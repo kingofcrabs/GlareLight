@@ -1,4 +1,5 @@
-﻿using GlareCalculator.ViewModels;
+﻿using EngineDll;
+using GlareCalculator.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -79,38 +80,17 @@ namespace GlareCalculator
         
         #region button events
 
-        private void OnClickThreshold(object sender, RoutedEventArgs e)
+        private void btnSearchRegions_Click(object sender, RoutedEventArgs e)
         {
-            if (!GlobalVars.Instance.ThresholdChangeFinished)
-                return;
-
-            GlobalVars.Instance.ThresholdChangeFinished = false;
-           
             List<byte> thresholdData = new List<byte>();
-            int val = engine.AdaptiveThreshold(brightness.grayValsInArray, brightness.Width, brightness.Height, ref thresholdData);
-
-            sliderThreshold.Value = val;
-            BitmapImage bmpImage = ImageHelper.CreateImage(thresholdData,brightness.Width,brightness.Height);
-            myCanvas.SetBkGroundImage(bmpImage);
-            GlobalVars.Instance.ThresholdChangeFinished = true;
+            List<List<MPoint>> contours = new List<List<MPoint>>();
+            //int val = engine.AdaptiveThreshold(brightness.grayValsInArray, brightness.Width, brightness.Height, ref thresholdData);
+            int val = engine.SearchLights(brightness.grayValsInArray, brightness.Width, brightness.Height,ref contours);
+            txtThreshold.Text = val.ToString();
+            myCanvas.SetContours(contours);
         }
 
-        private void onThresholdChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if(!GlobalVars.Instance.ThresholdChangeFinished)
-                return;
-            GlobalVars.Instance.ThresholdChangeFinished = false;
-            List<byte> thresholdData = brightness.Threshold(sliderThreshold.Value);
-            BitmapImage bmpImage = ImageHelper.CreateImage(thresholdData, brightness.Width, brightness.Height);
-            myCanvas.SetBkGroundImage(bmpImage);
-            GlobalVars.Instance.ThresholdChangeFinished = true;
-            
-        }
-        //private void btnSearch_Click(object sender, RoutedEventArgs e)
-        //{
-        //    EngineDll.IEngine engine = new EngineDll.IEngine();
-        //    engine.FindContours(brightness.pngFile, 3);
-        //}
+       
         private void btnDel_Click(object sender, RoutedEventArgs e)
         {
             //if (lstRegions.SelectedIndex == -1)
@@ -344,6 +324,9 @@ namespace GlareCalculator
         }
         #endregion
 
+       
+
+        
        
 
      

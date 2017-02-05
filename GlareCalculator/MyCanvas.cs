@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineDll;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -33,10 +34,21 @@ namespace GlareCalculator
             timer.Start();
         }
 
-      
+        public void SetContours(List<List<MPoint>> contours)
+        {
+            shapes.Clear();
+            foreach(var pts in contours)
+            {
+                Polygon polygon = new Polygon(pts);
+                shapes.Add(polygon);
+            }
+            NotifyShapeChanged();
+            InvalidateVisual();
+        }
 
         public void SetBkGroundImage(BitmapImage bmpImage)
         {
+            shapes.Clear();
             ImageBrush imageBrush = new ImageBrush();
             imageBrush.ImageSource = bmpImage;
             this.Background = imageBrush;

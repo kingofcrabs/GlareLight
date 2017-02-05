@@ -14,9 +14,18 @@ public:
 	double pixelUnit; //camera's pixel unit um
 
 	EngineImpl();
-	Mat img;
+	
 	double CalculateGlare(std::string sFile,std::vector<Rect2f> rc);
 	void Convert2PesudoColor(std::string srcFile, std::string destFile);
+	
+	int AdaptiveThreshold(uchar*, int width, int height,std::vector<uchar>& vector);
+	int SearchLights(uchar* pdata, int width, int height, int min, int max, std::vector<std::vector<cv::Point>>& contours);
+	std::vector<std::vector<Point>> contours;
+	int max, min;
+private:
+	double CalculateOmega(int x, int y);
+	double CalculateGuthPosition(int x, int y);
+	double  GetDistance(double x1, double y1, double x2, double y2);
 	void  FindContours(std::string sFile,
 		std::vector<std::vector<cv::Point>
 		>& contours,
@@ -26,11 +35,9 @@ public:
 		std::vector<std::vector<cv::Point>
 		>& contours,
 		int min, int max, int cnt2Find);
-	int AdaptiveThreshold(uchar*, int width, int height,std::vector<uchar>& vector);
-private:
-	double CalculateOmega(int x, int y);
-	double CalculateGuthPosition(int x, int y);
-	double  GetDistance(double x1, double y1, double x2, double y2);
+	//void on_trackbar(int val, void*);
+	
+	int thresholdVal;
 	
 };
 
