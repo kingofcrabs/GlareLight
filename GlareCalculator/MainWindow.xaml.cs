@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace GlareCalculator
 {
@@ -45,7 +46,15 @@ namespace GlareCalculator
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            //myCanvas.SetBkGroundImage();
+            License license = new License();
+            string key = Utility.GetKeyString();
+            bool bValid = license.CheckRegistCode(key);
+            GlobalVars.Instance.Registed = bValid;
+            if(!bValid)
+            {
+                this.Title = "软件未注册！";
+            }
+            tabs.IsEnabled = false;
             myCanvas.IsHitTestVisible = false;
             scrollViewer.PreviewMouseLeftButtonUp += scrollViewer_PreviewMouseLeftButtonUp;
             scrollViewer.PreviewMouseLeftButtonDown += scrollViewer_PreviewMouseLeftButtonDown;
@@ -105,6 +114,13 @@ namespace GlareCalculator
 
         private void btnCalculateUGR_Click(object sender, RoutedEventArgs e)
         {
+            if(shapes.Count == 0)
+            {
+                SetInfo("未设置任何发光区域！", true);
+                return;
+            }
+            SetInfo("正在计算，请稍候！", false);
+            this.Refresh();
             OperationToggleButtonPressed(Operation.none); //reset
             GlareLight glareLight = new GlareLight();
             List<GlareResult> results = new List<GlareResult>();
@@ -133,6 +149,7 @@ namespace GlareCalculator
                    "--");
             lstviewResult.ItemsSource = tbl.DefaultView;
             txtUGR.Text = ugr.ToString("0.00");
+            SetInfo("", false);
         }
         private void btnOpen_Click(object sender, RoutedEventArgs e)
         {
@@ -161,9 +178,12 @@ namespace GlareCalculator
             fileDialog.Filter = "亮度文件(*.txt)|*.txt|所有文件(*.*)|(*.*)";
             if (fileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
                 return;
-
+            
+            SetInfo("正在读入亮度文件...", false);
+            this.Refresh();
             brightness.Read(fileDialog.FileName);
-            SetInfo("Load brightness file successfully.", false);
+            SetInfo("成功读入亮度文件。", false);
+            tabs.IsEnabled = true;
             grpShape.IsEnabled = true;
             BitmapImage bmpImage = ImageHelper.CreateImage(brightness.grayVals);
             Save2File(bmpImage);
@@ -185,7 +205,7 @@ namespace GlareCalculator
 
         private void OnOpenFile_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
+            e.CanExecute = GlobalVars.Instance.Registed;
         }
 
         private void OnDelete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -194,7 +214,8 @@ namespace GlareCalculator
         }
         private void CommandHelp_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-
+            AboutBox aboutBox = new AboutBox();
+            aboutBox.ShowDialog();
         }
 
         private void CommandHelp_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -225,6 +246,12 @@ namespace GlareCalculator
             OnComplete();
             
         }
+        private void btnReist_Click(object sender, RoutedEventArgs e)
+        {
+            RegistInfo registInfo = new RegistInfo();
+            registInfo.ShowDialog();
+        }
+
 
         private void OnComplete()
         {
@@ -326,6 +353,12 @@ namespace GlareCalculator
 
        
 
+       
+
+     
+
+       
+
         
        
 
@@ -334,7 +367,18 @@ namespace GlareCalculator
        
     }
 
-   
-      
+
+    public static class ExtensionMethods
+    {
+        private static Action EmptyDelegate = delegate() { };
+
+        public static void Refresh(this UIElement uiElement)
+        {
+
+            uiElement.Dispatcher.Invoke(DispatcherPriority.ContextIdle, EmptyDelegate);
+
+        }
+
+    }   
     
 }

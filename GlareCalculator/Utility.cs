@@ -164,6 +164,14 @@ namespace GlareCalculator
             }
             return false;
         }
+
+        internal static string GetKeyString()
+        {
+            string sFile = GetExeFolder() + "key.txt";
+            if (!File.Exists(sFile))
+                return "";
+            return File.ReadAllText(sFile);
+        }
     }
 
     public sealed class StringWriterWithEncoding : StringWriter

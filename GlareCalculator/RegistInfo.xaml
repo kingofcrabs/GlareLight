@@ -1,0 +1,17 @@
+﻿<Window x:Class="GlareCalculator.RegistInfo"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="注册" Height="200" Width="300">
+    <Grid>
+        <StackPanel>
+        <StackPanel Margin="2,5,2,2" Height="30" VerticalAlignment="Top" Orientation="Horizontal">
+            <TextBlock>电脑信息：</TextBlock>
+            <TextBox Name="txtPCInfo" Width="220"></TextBox>
+        </StackPanel>
+        <StackPanel Margin="2,100,0,0">
+            <Button Name="btnOk" Width="60" HorizontalAlignment="Right" Click="btnOk_Click">确定</Button>
+        </StackPanel>
+        </StackPanel>
+        
+    </Grid>
+</Window>

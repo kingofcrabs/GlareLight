@@ -36,6 +36,8 @@ namespace GlareCalculator
         }
 
         public bool ThresholdChangeFinished { get; set; }
+
+        public bool Registed { get; set; }
     }
 
     [Serializable]
