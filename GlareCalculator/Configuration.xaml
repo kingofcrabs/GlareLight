@@ -4,31 +4,39 @@
         Title="修改配置" Height="200" Width="300">
     <Grid>
         <StackPanel>
-        <StackPanel Margin="1,5,0,0" Orientation="Horizontal">
-            <Label>相机类型：</Label>
-            <ComboBox>
-                <ComboBoxItem IsSelected="True">5.5um</ComboBoxItem>
+            <StackPanel Margin="1,5,0,0" Orientation="Horizontal">
+                <Label>相机类型：</Label>
+                <ComboBox Name="cmbPixel" Width="60">
                     <ComboBoxItem>2.2um</ComboBoxItem>
-            </ComboBox>
-        </StackPanel>
-        <StackPanel Margin="1,5,0,0" Orientation="Horizontal">
-            <Label>镜头类型：</Label>
-            <ComboBox>
-                <ComboBoxItem IsSelected="True">8mm</ComboBoxItem>
-                <ComboBoxItem>6mm</ComboBoxItem>
-            </ComboBox>
-            
-        </StackPanel>
+                    <ComboBoxItem IsSelected="True">5.5um</ComboBoxItem>
+                    
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Margin="1,5,0,0" Orientation="Horizontal">
+                <Label>镜头类型：</Label>
+                <ComboBox Name="cmbLen" Width="60">
+                    <ComboBoxItem IsSelected="True">8mm</ComboBoxItem>
+                    <ComboBoxItem>6mm</ComboBoxItem>
+                </ComboBox>
+
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label>年龄：</Label>
+                <TextBox  Name="txtAge" Width="60" Margin="30,0,0,0">23</TextBox>
+            </StackPanel>
             <Grid Margin="0,5,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="65"/>
+                    
+
+
                 </Grid.ColumnDefinitions>
+
                 <Button Name="btnCancel" Margin="0,0,0,0" Width="60" HorizontalAlignment="Right"  Grid.Column="0" Click="btnCancel_Click">Cancel</Button>
-                <Button Name="btnOk" Margin="2,0,0,0" Grid.Column="1" HorizontalAlignment="Left" Width="60" Click="btnOk_Click" >Ok</Button>
+                <Button Name="btnOk" Margin="2,0,0,0" Grid.Column="1" HorizontalAlignment="Right" Width="60" Click="btnOk_Click" >Ok</Button>
             </Grid>
-          
+
         </StackPanel>
     </Grid>
 </Window>

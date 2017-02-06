@@ -21,17 +21,33 @@ namespace GlareCalculator
 
         List<ShapeBase> shapes = new List<ShapeBase>();
         ShapeBase newShape = null;
-
+        RoadPolygon roadPolygon = new RoadPolygon();
         Point invalidPt = new Point(-1,-1);
         bool shouldBlow = false;
-        public delegate void ShapeChanged(List<ShapeBase> shapes);
-        public event ShapeChanged onShapeChanged;
+        public delegate void RoadFinished();
+        public event RoadFinished onRoadPolygonFinished;
         private Timer timer = new Timer(500);
 
         public MyCanvas()
         {
             timer.Elapsed += timer_Elapsed;
             timer.Start();
+        }
+
+        public List<ShapeBase> Shapes
+        {
+            get
+            {
+                return shapes;
+            }
+        }
+
+        public RoadPolygon RoadPolygon
+        {
+            get
+            {
+                return roadPolygon;
+            }
         }
 
         public void SetContours(List<List<MPoint>> contours)
@@ -42,7 +58,7 @@ namespace GlareCalculator
                 Polygon polygon = new Polygon(pts);
                 shapes.Add(polygon);
             }
-            NotifyShapeChanged();
+            NotifyRoadFinished();
             InvalidateVisual();
         }
 
@@ -79,6 +95,8 @@ namespace GlareCalculator
                 newShape.Render(drawingContext, shouldBlow);
             var grayBrush = Brushes.Gray;
             shapes.ForEach(x => x.Render(drawingContext, shouldBlow));
+            if(roadPolygon != null)
+                roadPolygon.Render(drawingContext, shouldBlow);
         }
 
 
@@ -126,11 +144,28 @@ namespace GlareCalculator
         {
             if (!(newShape is Polygon))
                 throw new Exception("当前形状不是多边形！");
+            
             ((Polygon)newShape).Enclose();
-            shapes.Add(newShape);
-            InvalidateVisual();
-            CreateNewShape(Operation.polygon);
-            NotifyShapeChanged();
+            if (CurrentOperation == Operation.road)
+            {
+                CheckIsValidRoad();
+                roadPolygon = (RoadPolygon)newShape;
+                NotifyRoadFinished();
+            }
+            else
+            {
+                shapes.Add(newShape);
+                InvalidateVisual();
+                CreateNewShape(Operation.polygon);
+            }
+            
+                
+        }
+
+        private void CheckIsValidRoad()
+        {
+            if (((Polygon)newShape).pts.Count != 4)
+                throw new Exception("道路必须用梯形画出！");
         }
 
         public void CreateNewShape(Operation operation)
@@ -139,23 +174,28 @@ namespace GlareCalculator
             shapes.ForEach(x => x.Selected = false);
             InvalidateVisual();
             newShape = null;
-            if (operation != Operation.circle && operation != Operation.polygon)
+            if (operation != Operation.circle && operation != Operation.polygon && operation != Operation.road)
                 return;
             if(operation == Operation.polygon)
                 newShape = new Polygon();
+            else if(operation == Operation.road)
+            {
+                roadPolygon = null; //only allow one road
+                newShape = new RoadPolygon();
+            }
             else
                 newShape = new Circle();
         }
 
-        private void NotifyShapeChanged()
+        private void NotifyRoadFinished()
         {
-            if (onShapeChanged != null)
-                onShapeChanged(shapes);
+            if (onRoadPolygonFinished != null)
+                onRoadPolygonFinished();
         }
         
         internal void LeftMouseDown(Point pt)
         {
-            if (CurrentOperation != Operation.circle && CurrentOperation != Operation.polygon)
+            if (CurrentOperation != Operation.circle && CurrentOperation != Operation.polygon && CurrentOperation != Operation.road)
                 return;
 
            
@@ -198,7 +238,7 @@ namespace GlareCalculator
             {
                 shapes.Add(newShape);
                 CreateNewShape(Operation.circle);
-                NotifyShapeChanged();
+                NotifyRoadFinished();
             }
             InvalidateVisual();
         }

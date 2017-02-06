@@ -9,19 +9,20 @@ namespace GlareCalculator
     public class GlobalVars
     {
         private static GlobalVars _instance = null;
-        public CameraInfo CameraInfo { get; set; }
+        public UserSettings UserSettings { get; set; }
         public GlobalVars()
         {
-            string cameraInfoFile = Utility.GetExeFolder() + "cameraInfo.xml";
-            ThresholdChangeFinished = true;
-            if(File.Exists(cameraInfoFile))
+            string settingFile = Utility.GetExeFolder() + "settingInfo.xml";
+            AgeDependingConstant = 1;
+            if(File.Exists(settingFile))
             {
-                string contend = File.ReadAllText(cameraInfoFile);
-                CameraInfo = Utility.Deserialize<CameraInfo>(contend);
+                string contend = File.ReadAllText(settingFile);
+                UserSettings = Utility.Deserialize<UserSettings>(contend);
             }
             else
             {
-                CameraInfo = new CameraInfo();
+                UserSettings = new UserSettings();
+                
             }
         }
 
@@ -35,22 +36,31 @@ namespace GlareCalculator
             }
         }
 
-        public bool ThresholdChangeFinished { get; set; }
+        public double AgeDependingConstant { get; set; }
 
         public bool Registed { get; set; }
     }
 
     [Serializable]
-    public class CameraInfo
+    public class UserSettings
     {
         public int Focus { get; set; }
         public double PixelLength { get; set; }
 
+        public int Age { get; set; }
         public string Name { get; set; }
-        public CameraInfo()
+        public UserSettings()
         {
             Focus = 8;
             PixelLength = 5.5;
+            Age = 23;
+        }
+
+        public UserSettings(int f, double pxLen, int age)
+        {
+            Focus = f;
+            PixelLength = pxLen;
+            Age = age;
         }
     }
 }

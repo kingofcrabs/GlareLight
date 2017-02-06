@@ -23,7 +23,7 @@ namespace GlareCalculator
     {
         static readonly  Dictionary<Operation, ToggleButton> operation_ButtonControl = new Dictionary<Operation, ToggleButton>();
 
-        List<ShapeBase> shapes = new List<ShapeBase>();
+        //List<ShapeBase> shapes = new List<ShapeBase>();
         Brightness brightness = new Brightness();
         HistogramModel viewModel;
         EngineDll.IEngine engine = null;
@@ -31,7 +31,7 @@ namespace GlareCalculator
         {
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
-            myCanvas.onShapeChanged += myCanvas_onShapeChanged;
+            myCanvas.onRoadPolygonFinished += myCanvas_onRoadPolygonFinished;
             InitToggleOperationDict();
             viewModel = new ViewModels.HistogramModel();
             DataContext = viewModel;
@@ -39,10 +39,10 @@ namespace GlareCalculator
             grpShape.IsEnabled = false;
             engine = new EngineDll.IEngine();
         }
-
-        void myCanvas_onShapeChanged(List<ShapeBase> shapes)
+        #region other events
+        void myCanvas_onRoadPolygonFinished()
         {
-            this.shapes = shapes;
+            OperationToggleButtonPressed(Operation.none);
         }
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -51,7 +51,7 @@ namespace GlareCalculator
             string key = Utility.GetKeyString();
             bool bValid = license.CheckRegistCode(key);
             GlobalVars.Instance.Registed = bValid;
-            if(!bValid)
+            if (!bValid)
             {
                 this.Title = "软件未注册！";
             }
@@ -71,7 +71,7 @@ namespace GlareCalculator
         private void ScrollViewer_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             Point pt = e.GetPosition(myCanvas);
-            myCanvas.LeftMouseMove(pt,GetCurrentOperation());
+            myCanvas.LeftMouseMove(pt, GetCurrentOperation());
         }
 
         void scrollViewer_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -79,15 +79,17 @@ namespace GlareCalculator
             Point pt = e.GetPosition(myCanvas);
             myCanvas.LeftMouseUp(pt);
         }
-      
+        #endregion
+
+        #region misc
         private void SetInfo(string str, bool error)
         {
             Brush brush = error ? Brushes.Red : Brushes.Black;
             txtInfo.Text = str;
             txtInfo.Foreground = brush;
         }
+        #endregion
 
-        
         #region button events
 
         private void btnSearchRegions_Click(object sender, RoutedEventArgs e)
@@ -100,22 +102,34 @@ namespace GlareCalculator
             myCanvas.SetContours(contours);
         }
 
-       
-        private void btnDel_Click(object sender, RoutedEventArgs e)
+        private void btnCalculateTI_Click(object sender, RoutedEventArgs e)
         {
-            //if (lstRegions.SelectedIndex == -1)
-            //    return;
-            
-            //myCanvas.Delete(lstRegions.SelectedIndex);
-        }
-        private void btnSelect_Click(object sender, RoutedEventArgs e)
-        {
-            OperationToggleButtonPressed(Operation.select);
+            if (myCanvas.Shapes.Count == 0)
+            {
+                SetInfo("未设置任何发光区域！", true);
+                return;
+            }
+            if(myCanvas.RoadPolygon == null)
+            {
+                SetInfo("未设置任何路面！", true);
+                return;
+            }
+            SetInfo("正在计算，请稍候！", false);
+            this.Refresh();
+            OperationToggleButtonPressed(Operation.none); //reset
+            GlareLight glareLight = new GlareLight();
+            double Lv = 0;
+            double Lave = 0;
+            double TI = glareLight.CalculateTI(brightness.orgVals, myCanvas.Shapes, myCanvas.RoadPolygon, ref Lv, ref Lave);
+            txtTI.Text = TI.ToString("0.00");
+            txtLv.Text = Lv.ToString("0.00");
+            txtLave.Text = Lave.ToString("0.00");
+
         }
 
         private void btnCalculateUGR_Click(object sender, RoutedEventArgs e)
         {
-            if(shapes.Count == 0)
+            if(myCanvas.Shapes.Count == 0)
             {
                 SetInfo("未设置任何发光区域！", true);
                 return;
@@ -126,7 +140,7 @@ namespace GlareCalculator
             GlareLight glareLight = new GlareLight();
             List<GlareResult> results = new List<GlareResult>();
             double LA = 0;
-            var ugr = glareLight.CalculateUGR(brightness.orgVals, shapes, ref results, ref LA);
+            var ugr = glareLight.CalculateUGR(brightness.orgVals, myCanvas.Shapes, ref results, ref LA);
 
             DataTable  tbl = new DataTable("result");
             tbl.Columns.Add("ID", typeof(string));
@@ -257,7 +271,8 @@ namespace GlareCalculator
 
         private void OnComplete()
         {
-            if (GetCurrentOperation() != Operation.polygon)
+            var curOp = GetCurrentOperation();
+            if (curOp != Operation.polygon && curOp != Operation.road)
             {
                 SetInfo("当前操作对象不是多边形，无法闭合！", true);
                 return;
@@ -287,12 +302,13 @@ namespace GlareCalculator
             operation_ButtonControl.Add(Operation.fakeColor, btnFakeColor);
             operation_ButtonControl.Add(Operation.select, btnSelect);
             operation_ButtonControl.Add(Operation.histogram, btnHistogram);
+            operation_ButtonControl.Add(Operation.road, btnRoadDef);
             return operation_ButtonControl;
         }
         private void OperationToggleButtonPressed(Operation op)
         {
             List<Operation> operations = new List<Operation>(){
-                Operation.polygon,Operation.circle,Operation.select,Operation.fakeColor,Operation.histogram
+                Operation.polygon,Operation.circle,Operation.select,Operation.fakeColor,Operation.histogram, Operation.road
             };
             foreach(Operation tmpOp in operations)
             {
@@ -326,6 +342,16 @@ namespace GlareCalculator
             scrollViewer.Visibility = isChecked ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible;
         }
 
+        private void btnSelect_Click(object sender, RoutedEventArgs e)
+        {
+            OperationToggleButtonPressed(Operation.select);
+        }
+
+        private void btnRoad_Click(object sender, RoutedEventArgs e)
+        {
+            OperationToggleButtonPressed(Operation.road);
+        }
+
         private void btnPolygon_Click(object sender, RoutedEventArgs e)
         {
             OperationToggleButtonPressed(Operation.polygon);
@@ -353,20 +379,6 @@ namespace GlareCalculator
             
         }
         #endregion
-
-       
-
-       
-
-     
-
-       
-
-        
-       
-
-     
-
        
     }
 

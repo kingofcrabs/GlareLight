@@ -10,12 +10,14 @@ namespace GlareCalculator
 {
     class GlareLight
     {
-        double pixelUnit = GlobalVars.Instance.CameraInfo.PixelLength / 1000000.0;//um
-        double f = GlobalVars.Instance.CameraInfo.Focus / 1000.0; //mm
+        double pixelUnit = GlobalVars.Instance.UserSettings.PixelLength / 1000000.0;//um
+        double f = GlobalVars.Instance.UserSettings.Focus / 1000.0; //mm
         GuthIndexes guthIndexes = new GuthIndexes();
         //UGR La
         public double CalculateUGR(List<List<double>> vals,List<ShapeBase> shapes, ref List<GlareResult> results,ref double LA)
         {
+            pixelUnit = GlobalVars.Instance.UserSettings.PixelLength / 1000000.0;//um update from GlobalVars
+            f = GlobalVars.Instance.UserSettings.Focus / 1000.0; //mm
             List<Point> insidePolygonPts = new List<Point>();
             Dictionary<ShapeBase, List<Point>> eachShape_pts = GetPtsInShapes(vals, shapes);
             LA = Average(vals);
@@ -45,7 +47,73 @@ namespace GlareCalculator
             return 8 * Math.Log(0.25 * sum / LA);
         }
 
-        public double CalculateTI(List<List<double>> vals,List<ShapeBase> shapes, ref double LA)
+        public double CalculateTI(List<List<double>> vals,
+            List<ShapeBase> shapes, Polygon roadRegion,
+            ref double Lv,ref double Lave)
+        {
+            Lv = GetLv(vals, shapes);
+            Lave = GetLave(vals, roadRegion);
+
+            return 65*Lv / Math.Pow(Lave,0.8);
+        }
+
+        private double GetLave(List<List<double>> vals, Polygon roadRegion)
+        {
+            var sortedPts = roadRegion.pts.OrderBy(pt => pt.X).ToList();
+            Point ptBottomLeft = sortedPts.First();
+            Point ptBottomRight = sortedPts.Last();
+            Point ptTopLeft = sortedPts[1];
+            Point ptTopRight = sortedPts[2];
+            ptBottomLeft.Y = ptBottomRight.Y = (ptBottomLeft.Y + ptBottomRight.Y) / 2.0;
+            ptTopLeft.Y = ptTopRight.Y = (ptTopLeft.Y + ptTopRight.Y) / 2.0;
+            //double topWidth = ptTopRight.X - ptTopLeft.X;
+            double bottomWidth = ptBottomRight.X - ptBottomLeft.X;
+            List<Point> candidates = roadRegion.GetPossiblePts();
+            var sameYLists = candidates.GroupBy(pt => pt.Y).Select(group => group.ToList()).ToList();
+            
+            double totalArea = 0;
+            double totalLv = 0;
+            foreach(var sameYPts in sameYLists)
+            {
+                double y = sameYPts.First().Y;
+                
+                double xStart, xEnd;
+                xStart = 10000;
+                xEnd = 0;
+                List<Point> thisLineValidPts = new List<Point>();
+                foreach(var pt in sameYPts)
+                {
+                    if (roadRegion.PtIsInside(pt))
+                    {
+                        if (pt.X < xStart)
+                            xStart = pt.X;
+                        if (pt.X > xEnd)
+                            xEnd = pt.X;
+                        thisLineValidPts.Add(pt);
+                    }
+                }
+                if (thisLineValidPts.Count == 0)
+                    continue;
+
+                
+                if(xEnd - xStart == 0)
+                    throw new Exception("非法梯形，某行宽度为0！");
+                double blowRatio =  bottomWidth/(xEnd - xStart);
+                blowRatio *= blowRatio;//^2
+                foreach(var pt in thisLineValidPts)
+                {
+                    totalLv += vals[(int)pt.Y][(int)pt.X] * blowRatio;
+                }
+
+                totalArea += sameYPts.Count * blowRatio;
+            }
+            return totalLv / totalArea;
+
+        }
+
+        
+
+        private double GetLv(List<List<double>> vals, List<ShapeBase> shapes)
         {
             //Lv = c*Evert/(θ^n)
             //Evert = ΣL(i,j)*Ω(i,j)*cosθ
@@ -57,17 +125,18 @@ namespace GlareCalculator
                 var pts = pair.Value;
                 if (pts.Count == 0)
                     continue;
-                
+
                 foreach (Point pt in pts)
                 {
                     double L = vals[(int)pt.Y][(int)pt.X];
                     double ω = 0;
                     double cosθ = 0;
                     CalculateOmegaAndTheta(vals, (int)pt.X, (int)pt.Y, ref ω, ref cosθ);
-                    sum += L * ω * cosθ;
+                    double θ = Math.Acos(cosθ);
+                    sum += L * ω * cosθ / (θ * θ);
                 }
             }
-            return sum;
+            return sum * GlobalVars.Instance.AgeDependingConstant;
         }
         
 

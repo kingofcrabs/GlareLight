@@ -149,14 +149,35 @@ namespace GlareCalculator
         }
     }
 
+    public class RoadPolygon : Polygon
+    {
+        public RoadPolygon()
+            :base()
+           
+        {
+          
+        }
+
+        public RoadPolygon(List<MPoint> pts):base(pts)
+        {
+
+        }
+
+        public override void Render(DrawingContext drawingContext, bool shouldBlow)
+        {
+            RenderImpl(drawingContext, shouldBlow, true);
+        }
+       
+    }
+
     public class Polygon : ShapeBase
     {
         public List<Point> pts;
-        Point currentPt;
-        private double mostLeft;
-        private double mostTop;
-        private double mostRight;
-        private double mostBottom;
+        protected Point currentPt;
+        protected double mostLeft;
+        protected double mostTop;
+        protected double mostRight;
+        protected double mostBottom;
         public Polygon()
         {
             pts = new List<Point>();
@@ -277,7 +298,7 @@ namespace GlareCalculator
             currentPt = pt;
         }
 
-        public override void Render(DrawingContext drawingContext, bool shouldBlow)
+        protected void RenderImpl(DrawingContext drawingContext, bool shouldBlow, bool isRoad = false)
         {
             if (pts.Count > 0 && Selected)
             {
@@ -286,7 +307,8 @@ namespace GlareCalculator
             }
 
 
-            Brush brush = Brushes.Blue;
+            Brush brush = isRoad ? Brushes.Pink : Brushes.Green;
+            
             int width = Selected ? 2 : 1;
             for (int i = 0; i < pts.Count; i++)
             {
@@ -313,6 +335,10 @@ namespace GlareCalculator
             if (currentPt != invalidPt && pts.Count != 0)
                 drawingContext.DrawLine(new Pen(brush, width), pts.Last(), currentPt);
         }
+        public override void Render(DrawingContext drawingContext, bool shouldBlow)
+        {
+            RenderImpl(drawingContext, shouldBlow);
+        }
     }
 
 
@@ -323,6 +349,7 @@ namespace GlareCalculator
         circle,
         fakeColor,
         select,
-        histogram
+        histogram,
+        road
     };
 }

@@ -50,6 +50,7 @@
             <RowDefinition Height="30"/>
             <RowDefinition Height="80"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="135"/>
         </Grid.RowDefinitions>
         <Grid.Resources>
@@ -112,32 +113,39 @@
                 </StackPanel>
             </Button>-->
         </StackPanel>
-
-        <TabControl Name="tabs" Grid.Row="2" Grid.RowSpan="2">
-            <TabItem Header="UGR">
-                <StackPanel Name="operations" Grid.Row="2">
-                    <Label>操作：</Label>
-                    <WrapPanel Name="grpShape">
-                        <ToggleButton ToolTip="多边形" Style="{StaticResource ToggleButtonStyle1}" Click="btnPolygon_Click" Name="btnPolygon" Width="64">
-                            <Image  Source="/Images/polygon.png"/>
-                        </ToggleButton>
-                        <ToggleButton ToolTip="圆" Style="{StaticResource ToggleButtonStyle1}" Click="btnCircle_Click" Name="btnCircle" Width="64">
-                            <Image  Source="/Images/circle.png"/>
-                        </ToggleButton>
-                        <!--<ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnMove_Click"  Name="btnMove" Width="64">
+        <StackPanel Name="operations" Grid.Row="2">
+            <Label>操作：</Label>
+            <WrapPanel Name="grpShape">
+                <ToggleButton ToolTip="多边形" Style="{StaticResource ToggleButtonStyle1}" Click="btnPolygon_Click" Name="btnPolygon" Width="64">
+                    <Image Height="50" Source="/Images/polygon.png"/>
+                </ToggleButton>
+                <ToggleButton ToolTip="圆" Style="{StaticResource ToggleButtonStyle1}" Click="btnCircle_Click" Name="btnCircle" Width="64">
+                    <Image Height="50" Source="/Images/circle.png"/>
+                </ToggleButton>
+                <!--<ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnMove_Click"  Name="btnMove" Width="64">
                     <Image  Source="/Images/move.png"/>
                 </ToggleButton>-->
-                        <ToggleButton ToolTip="选中" Style="{StaticResource ToggleButtonStyle1}" Click="btnSelect_Click" Name="btnSelect" Width="64">
-                            <Image  Source="/Images/selection.png"/>
-                        </ToggleButton>
-                        <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnFakeColor_Click" Name="btnFakeColor" Width="64">
-                            <Image ToolTip="伪彩"  Source="/Images/fakeColor.jpg"/>
-                        </ToggleButton>
-                        <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnHistogram_Click" Name="btnHistogram" Width="64">
-                            <Image ToolTip="直方图"  Source="/Images/histogram.png" Height="50" Width="54"/>
-                        </ToggleButton>
-                    </WrapPanel>
-
+                <ToggleButton ToolTip="选中" Style="{StaticResource ToggleButtonStyle1}" Click="btnSelect_Click" Name="btnSelect" Width="64">
+                    <Image Height="50" Source="/Images/selection.png"/>
+                </ToggleButton>
+                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnFakeColor_Click" Name="btnFakeColor" Width="64">
+                    <Image ToolTip="伪彩" Height="50" Width="50" Source="/Images/fakeColor.jpg"/>
+                </ToggleButton>
+                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnHistogram_Click" Name="btnHistogram" Width="64">
+                    <Image ToolTip="直方图" Height="50" Width="50"  Source="/Images/histogram.png" />
+                </ToggleButton>
+                <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnRoad_Click" Name="btnRoadDef" Width="64">
+                    <Image ToolTip="道路" Height="50" Width="50" Source="/Images/road.jpg"/>
+                </ToggleButton>
+            </WrapPanel>
+        </StackPanel>
+        <TabControl Name="tabs" Grid.Row="3" Grid.RowSpan="2">
+            <TabItem Header="UGR">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="60"></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal">
                         <Button Name="btnCalculateUGR" Width="64"  Click="btnCalculateUGR_Click" ToolTip="计算UGR">
                             <StackPanel>
@@ -147,14 +155,12 @@
                         <Label VerticalAlignment="Center" FontSize="32">UGR:</Label>
                         <TextBox Name="txtUGR" FontSize="32" VerticalAlignment="Center" Text="" Width="100" Margin="0,0,10,0"></TextBox>
                     </StackPanel>
-
-
-                    <Grid Name="resultGrid" Margin="0,5,0,0">
+                    <Grid Name="resultGrid" Grid.Row="1" Margin="0,5,0,0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="30"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <Label>UGR区域信息：</Label>
+                        <Label>区域信息：</Label>
                         <ScrollViewer x:Name="scrollViewerResult" Grid.Row="1" VerticalScrollBarVisibility="Auto"
                    HorizontalScrollBarVisibility="Auto" VerticalAlignment="Top" >
                             <ListView Name="lstviewResult"  FontFamily="SimSun" >
@@ -169,9 +175,32 @@
                             </ListView>
                         </ScrollViewer>
                     </Grid>
-                </StackPanel>
+                </Grid>
+                
             </TabItem>
-            <TabItem Header="TI" />
+            <TabItem Header="TI" >
+                <StackPanel>
+                    <StackPanel Height="80" Orientation="Horizontal" VerticalAlignment="Top">
+                        <Button Name="btnCalculateTI" Width="64"  Click="btnCalculateTI_Click" ToolTip="计算UGR">
+                            <StackPanel>
+                                <Image  Source="/Images/calculator.jpg"/>
+                            </StackPanel>
+                        </Button>
+                        <Label VerticalAlignment="Center" FontSize="32">TI:</Label>
+                        <TextBox Name="txtTI" FontSize="32" VerticalAlignment="Center" Text="" Width="100" Margin="0,0,10,0"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Label>Lv:</Label>
+                        <TextBox Margin="50,0,0,0" Width="100" Name="txtLv"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Label>Lave,road:</Label>
+                        <TextBox Width="100" Name="txtLave"></TextBox>
+                    </StackPanel>
+                </StackPanel>
+                
+            </TabItem>
+
             <TabItem Header="智能查找">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -194,7 +223,7 @@
         </TabControl>
        
 
-        <Grid Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"  >
+        <Grid Grid.Row="1" Grid.Column="1" Grid.RowSpan="3"  >
             <oxy:Plot x:Name="plot1" Visibility="Hidden"  Title="Histogram">
                 <oxy:LinearBarSeries ItemsSource="{Binding Histogram}" DataFieldX="GrayLevel" DataFieldY="Count" Title="Gray&amp;Count" FillColor="#454CAF50" StrokeColor="#4CAF50" StrokeThickness="1" BarWidth="5"/>
                 <oxy:Plot.Annotations>
@@ -209,7 +238,7 @@
             </ScrollViewer>
         </Grid>
         
-        <StackPanel Name="infoStackPanel" Grid.Column="1" Grid.Row="3" Margin="1,0,10,5">
+        <StackPanel Name="infoStackPanel" Grid.Column="1" Grid.Row="4" Margin="1,0,10,5">
             <Label>信息：</Label>
             <TextBox Name="txtInfo" Height="100" Margin="0,0,0,5" TextWrapping="Wrap"></TextBox>
         </StackPanel>
