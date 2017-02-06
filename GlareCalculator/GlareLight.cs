@@ -73,25 +73,20 @@ namespace GlareCalculator
 
         private Dictionary<ShapeBase, List<Point>> GetPtsInShapes(List<List<double>> vals, List<ShapeBase> shapes)
         {
-            double max = 0;
             Dictionary<ShapeBase, List<Point>> eachShape_pts = new Dictionary<ShapeBase, List<Point>>();
             shapes.ForEach(x => eachShape_pts.Add(x, new List<Point>()));
-            for (int y = 0; y < vals.Count; y++)
+            List<Point> allCandidates = new List<Point>();
+            shapes.ForEach(s => allCandidates.AddRange(s.GetPossiblePts()));
+            foreach(Point pt in allCandidates)
             {
-                for (int x = 0; x < vals[y].Count; x++)
-                {
-                    if (vals[y][x] > max)
-                        max = vals[y][x];
-                    Point pt = new Point(x, y);
-                    foreach (ShapeBase shape in shapes)
-                    {
-                        if (shape.PtIsInside(pt))
-                        {
-                            eachShape_pts[shape].Add(pt);
-                            break;
-                        }
-                    }
-                }
+                 foreach (ShapeBase shape in shapes)
+                 {
+                     if (shape.PtIsInside(pt))
+                     {
+                         eachShape_pts[shape].Add(pt);
+                         break;
+                     }
+                 }
             }
             return eachShape_pts;
         }

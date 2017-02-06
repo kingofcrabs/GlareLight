@@ -57,6 +57,11 @@ namespace GlareCalculator
         {
             throw new NotImplementedException();
         }
+
+        public virtual List<Point> GetPossiblePts()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class Circle : ShapeBase
@@ -78,6 +83,22 @@ namespace GlareCalculator
 
             return GetDistance(ptCircle, pt) <= Radius;
         }
+
+        public override List<Point> GetPossiblePts()
+        {
+            int startX = (int)Math.Floor(ptCircle.X);
+            int startY = (int)Math.Floor(ptCircle.Y);
+            int endX =  (int)Math.Ceiling(ptCircle.X + Radius);
+            int endY = (int)Math.Ceiling(ptCircle.Y + Radius);
+            List<Point> pts = new List<Point>();
+            for(int x = startX; x < endX; x++)
+            {
+                for (int y = startY; y < endY; y++)
+                    pts.Add(new Point(x, y));
+            }
+            return pts;
+        }
+
         public override void OnLeftMouseDown(Point newPt)
         {
             if (ptCircle == invalidPt)
@@ -132,7 +153,10 @@ namespace GlareCalculator
     {
         public List<Point> pts;
         Point currentPt;
-
+        private double mostLeft;
+        private double mostTop;
+        private double mostRight;
+        private double mostBottom;
         public Polygon()
         {
             pts = new List<Point>();
@@ -148,6 +172,15 @@ namespace GlareCalculator
             currentPt = invalidPt;
             Selected = false;
             Finished = true;
+            FindBoundary();
+        }
+
+        private void FindBoundary()
+        {
+            mostLeft = pts.Min(pt => pt.X);
+            mostRight = pts.Max(pt => pt.X);
+            mostTop = pts.Min(pt => pt.Y);
+            mostBottom = pts.Max(pt => pt.Y);
         }
 
         public override bool PtIsInside(Point pt)
@@ -155,6 +188,21 @@ namespace GlareCalculator
             if (!Finished)
                 return false;
             return IsPointInPolygon(pt, pts);
+        }
+
+        public override List<Point> GetPossiblePts()
+        {
+            int startX = (int)mostLeft;
+            int startY = (int)mostTop;
+            int endX = (int)mostRight;
+            int endY = (int)mostBottom;
+            List<Point> pts = new List<Point>();
+            for (int x = startX; x < endX; x++)
+            {
+                for (int y = startY; y < endY; y++)
+                    pts.Add(new Point(x, y));
+            }
+            return pts;
         }
 
         private bool IsPointInPolygon(Point point, List<Point> polygon)
@@ -165,6 +213,13 @@ namespace GlareCalculator
             // x, y for tested point.
             double pointX = point.X;
             double pointY = point.Y;
+
+            bool ptInBoundary = pointX <= mostRight 
+                && pointX >= mostLeft 
+                && pointY <= mostBottom
+                && pointY >= mostTop;
+            if (!ptInBoundary)
+                return false;
             // start / end point for the current polygon segment.
             double startX, startY, endX, endY;
             Point endPoint = polygon[polygonLineCnt - 1];
@@ -198,6 +253,7 @@ namespace GlareCalculator
             Finished = true;
             Selected = false;
             currentPt = pts[0];
+            FindBoundary();
         }
 
         public override void OnMouseMove(Point newPt)
