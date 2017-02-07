@@ -179,8 +179,19 @@
                 
             </TabItem>
             <TabItem Header="TI" >
+                
                 <StackPanel>
-                    <StackPanel Height="80" Orientation="Horizontal" VerticalAlignment="Top">
+                    <StackPanel Orientation="Horizontal">
+                        <Label>车道数:</Label>
+                        <TextBox Width="60" Margin="0,5,0,5" Name="txtLanes">4</TextBox>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label>点数:</Label>
+                        <TextBox Margin="15,0,0,5" Width="60" Name="txtPts">4</TextBox>
+                    </StackPanel>
+                    
+                    <StackPanel Height="80" Margin="2,0,0,0" Orientation="Horizontal" VerticalAlignment="Top">
                         <Button Name="btnCalculateTI" Width="64"  Click="btnCalculateTI_Click" ToolTip="计算UGR">
                             <StackPanel>
                                 <Image  Source="/Images/calculator.jpg"/>
@@ -191,11 +202,11 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                         <Label>Lv:</Label>
-                        <TextBox Margin="50,0,0,0" Width="100" Name="txtLv"></TextBox>
+                        <TextBox Margin="50,0,0,0" IsEnabled="False" Width="100" Name="txtLv"></TextBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                         <Label>Lave,road:</Label>
-                        <TextBox Width="100" Name="txtLave"></TextBox>
+                        <TextBox Width="100" IsEnabled="False" Name="txtLave"></TextBox>
                     </StackPanel>
                 </StackPanel>
                 

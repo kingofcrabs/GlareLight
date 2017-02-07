@@ -151,22 +151,117 @@ namespace GlareCalculator
 
     public class RoadPolygon : Polygon
     {
-        public RoadPolygon()
+        Point ptBottomLeft;
+        Point ptBottomRight;
+        Point ptTopLeft;
+        Point ptTopRight;
+        int laneCnt;
+        int ptCnt;
+        //double realH;
+        List<List<Point>> eachLanePts = new List<List<Point>>();
+        public Point BottomLeft { 
+            get 
+            {
+                return ptBottomLeft;
+            } 
+        }
+        public Point BottomRight
+        {
+            get
+            {
+                return ptBottomRight;
+            }
+        }
+        public RoadPolygon(int laneCnt, int ptCnt)
             :base()
            
         {
-          
+            this.laneCnt = laneCnt;
+            this.ptCnt = ptCnt;
         }
 
-        public RoadPolygon(List<MPoint> pts):base(pts)
+        public RoadPolygon(List<MPoint> pts,int laneCnt, int ptCnt):base(pts)
         {
+            this.laneCnt = laneCnt;
+            this.ptCnt = ptCnt;
+        }
+
+        public void Normalize()
+        {
+            var sortedPts = pts.OrderBy(pt => pt.X).ToList();
+            ptBottomLeft = sortedPts.First();
+            ptBottomRight = sortedPts.Last();
+            ptTopLeft = sortedPts[1];
+            ptTopRight = sortedPts[2];
+            ptBottomLeft.Y = ptBottomRight.Y = (BottomLeft.Y + BottomRight.Y) / 2.0;
+            ptTopLeft.Y = ptTopRight.Y = (ptTopLeft.Y + ptTopRight.Y) / 2.0;
+            pts.Clear();
+            pts.Add(ptTopLeft);
+            pts.Add(ptTopRight);
+            pts.Add(ptBottomRight);
+            pts.Add(ptBottomLeft);
+
+            //get realH
+            double topWith = ptTopRight.X - ptTopLeft.X;
+            double bottomWidth = ptBottomRight.X - ptBottomLeft.X;
+            double h = ptBottomLeft.Y - ptTopLeft.Y;
+            int yIndex = 0;
+            double realH = 0;
+            double eachStepWidthDiff = (bottomWidth - topWith) / h;
+           
+            for (int yPixel = (int)ptTopRight.Y; yPixel < (int)ptBottomRight.Y; yPixel++)
+            {
+                double currentWidth = topWith + yIndex * eachStepWidthDiff;
+                yIndex++;
+                realH += bottomWidth / currentWidth;
+            }
+            double expectedDistance = realH / ptCnt;
+
+            //calculate points
+            double k1 = (ptBottomLeft.Y - ptTopLeft.Y) / (ptBottomLeft.X - ptTopLeft.X);
+            //double k2 = (ptBottomRight.Y - ptTopRight.Y) / (ptTopRight.X - ptBottomRight.X);
+            List<int> yPositions = new List<int>();
+            double totalDistance = 0;
+            yIndex = 0;
+            eachLanePts.Clear();
+            for (int yPixel = (int)ptTopRight.Y; yPixel < (int)ptBottomRight.Y; yPixel++)
+            {
+                double currentWidth = topWith + yIndex * eachStepWidthDiff;
+                yIndex++;
+                totalDistance += bottomWidth / currentWidth;
+                if (totalDistance > expectedDistance)
+                {
+                    totalDistance = 0;
+                    yPositions.Add(yPixel);
+                    double xStart = ptTopLeft.X + yIndex / k1;
+                    double xEnd = xStart + currentWidth;
+                    List<Point> linePts = new List<Point>();
+                    linePts.Add(new Point(xStart, yPixel));
+                    linePts.Add(new Point(xEnd, yPixel));
+                    eachLanePts.Add(linePts);
+                }
+
+            }
 
         }
 
         public override void Render(DrawingContext drawingContext, bool shouldBlow)
         {
-            RenderImpl(drawingContext, shouldBlow, true);
+            RenderBoundary(drawingContext, shouldBlow, Brushes.Pink);
+            RenderNet(drawingContext);
         }
+
+        private void RenderNet(DrawingContext drawingContext)
+        {
+            if (!Finished)
+                return;
+            foreach(var linePts in eachLanePts)
+            {
+                drawingContext.DrawLine(new Pen(Brushes.Red, 1), linePts.First(), linePts.Last());
+            }
+        }
+
+
        
     }
 
@@ -298,7 +393,7 @@ namespace GlareCalculator
             currentPt = pt;
         }
 
-        protected void RenderImpl(DrawingContext drawingContext, bool shouldBlow, bool isRoad = false)
+        protected void RenderBoundary(DrawingContext drawingContext, bool shouldBlow, Brush brush)
         {
             if (pts.Count > 0 && Selected)
             {
@@ -307,7 +402,7 @@ namespace GlareCalculator
             }
 
 
-            Brush brush = isRoad ? Brushes.Pink : Brushes.Green;
+          
             
             int width = Selected ? 2 : 1;
             for (int i = 0; i < pts.Count; i++)
@@ -337,7 +432,7 @@ namespace GlareCalculator
         }
         public override void Render(DrawingContext drawingContext, bool shouldBlow)
         {
-            RenderImpl(drawingContext, shouldBlow);
+            RenderBoundary(drawingContext, shouldBlow, Brushes.Green);
         }
     }
 

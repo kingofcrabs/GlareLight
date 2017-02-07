@@ -48,7 +48,7 @@ namespace GlareCalculator
         }
 
         public double CalculateTI(List<List<double>> vals,
-            List<ShapeBase> shapes, Polygon roadRegion,
+            List<ShapeBase> shapes, RoadPolygon roadRegion,
             ref double Lv,ref double Lave)
         {
             Lv = GetLv(vals, shapes);
@@ -57,16 +57,10 @@ namespace GlareCalculator
             return 65*Lv / Math.Pow(Lave,0.8);
         }
 
-        private double GetLave(List<List<double>> vals, Polygon roadRegion)
+        private double GetLave(List<List<double>> vals, RoadPolygon roadRegion)
         {
-            var sortedPts = roadRegion.pts.OrderBy(pt => pt.X).ToList();
-            Point ptBottomLeft = sortedPts.First();
-            Point ptBottomRight = sortedPts.Last();
-            Point ptTopLeft = sortedPts[1];
-            Point ptTopRight = sortedPts[2];
-            ptBottomLeft.Y = ptBottomRight.Y = (ptBottomLeft.Y + ptBottomRight.Y) / 2.0;
-            ptTopLeft.Y = ptTopRight.Y = (ptTopLeft.Y + ptTopRight.Y) / 2.0;
-            //double topWidth = ptTopRight.X - ptTopLeft.X;
+            var ptBottomRight = roadRegion.BottomRight;
+            var ptBottomLeft = roadRegion.BottomLeft;
             double bottomWidth = ptBottomRight.X - ptBottomLeft.X;
             List<Point> candidates = roadRegion.GetPossiblePts();
             var sameYLists = candidates.GroupBy(pt => pt.Y).Select(group => group.ToList()).ToList();

@@ -21,7 +21,7 @@ namespace GlareCalculator
 
         List<ShapeBase> shapes = new List<ShapeBase>();
         ShapeBase newShape = null;
-        RoadPolygon roadPolygon = new RoadPolygon();
+        RoadPolygon roadPolygon = new RoadPolygon(1,1);
         Point invalidPt = new Point(-1,-1);
         bool shouldBlow = false;
         public delegate void RoadFinished();
@@ -150,15 +150,15 @@ namespace GlareCalculator
             {
                 CheckIsValidRoad();
                 roadPolygon = (RoadPolygon)newShape;
+                roadPolygon.Normalize();
                 NotifyRoadFinished();
             }
             else
             {
                 shapes.Add(newShape);
-                InvalidateVisual();
                 CreateNewShape(Operation.polygon);
             }
-            
+            InvalidateVisual();
                 
         }
 
@@ -168,7 +168,7 @@ namespace GlareCalculator
                 throw new Exception("道路必须用梯形画出！");
         }
 
-        public void CreateNewShape(Operation operation)
+        public void CreateNewShape(Operation operation, int lanes = 1, int ptsPerLane = 1)
         {
             CurrentOperation = operation;
             shapes.ForEach(x => x.Selected = false);
@@ -181,7 +181,7 @@ namespace GlareCalculator
             else if(operation == Operation.road)
             {
                 roadPolygon = null; //only allow one road
-                newShape = new RoadPolygon();
+                newShape = new RoadPolygon(lanes, ptsPerLane);
             }
             else
                 newShape = new Circle();

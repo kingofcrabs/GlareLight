@@ -126,7 +126,6 @@ namespace GlareCalculator
             txtLave.Text = Lave.ToString("0.00");
 
         }
-
         private void btnCalculateUGR_Click(object sender, RoutedEventArgs e)
         {
             if(myCanvas.Shapes.Count == 0)
@@ -323,7 +322,15 @@ namespace GlareCalculator
                     
                 operation_ButtonControl[tmpOp].IsChecked = false;
             }
-            myCanvas.CreateNewShape(op);
+
+            int laneCnt = 1;
+            int ptsPerLane = 5;
+            if(op == Operation.road)
+            {
+                 laneCnt = int.Parse(txtLanes.Text);
+                 ptsPerLane = int.Parse(txtPts.Text);
+            }
+            myCanvas.CreateNewShape(op,laneCnt,ptsPerLane);
         }
 
         private void btnHistogram_Click(object sender, RoutedEventArgs e)
