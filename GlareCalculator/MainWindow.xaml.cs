@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -31,7 +32,7 @@ namespace GlareCalculator
         {
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
-            myCanvas.onRoadPolygonFinished += myCanvas_onRoadPolygonFinished;
+            myCanvas.onRoadPlayGroundFinished += myCanvas_onRoadOrPlaygroundFinished;
             InitToggleOperationDict();
             viewModel = new ViewModels.HistogramModel();
             DataContext = viewModel;
@@ -40,7 +41,7 @@ namespace GlareCalculator
             engine = new EngineDll.IEngine();
         }
         #region other events
-        void myCanvas_onRoadPolygonFinished()
+        void myCanvas_onRoadOrPlaygroundFinished()
         {
             OperationToggleButtonPressed(Operation.none);
         }
@@ -62,21 +63,32 @@ namespace GlareCalculator
             scrollViewer.PreviewMouseMove += ScrollViewer_PreviewMouseMove;
         }
 
+        bool IsInvalidPt(Point pt)
+        {
+            return pt.X > scrollViewer.ViewportWidth || pt.Y > scrollViewer.ViewportHeight;
+                
+        }
         void scrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             Point pt = e.GetPosition(myCanvas);
+            if (IsInvalidPt(pt))
+                return;
             myCanvas.LeftMouseDown(pt);
         }
 
         private void ScrollViewer_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             Point pt = e.GetPosition(myCanvas);
+            if (IsInvalidPt(pt))
+                return;
             myCanvas.LeftMouseMove(pt, GetCurrentOperation());
         }
 
         void scrollViewer_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             Point pt = e.GetPosition(myCanvas);
+            if (IsInvalidPt(pt))
+                return;
             myCanvas.LeftMouseUp(pt);
         }
         #endregion
@@ -96,10 +108,40 @@ namespace GlareCalculator
         {
             List<byte> thresholdData = new List<byte>();
             List<List<MPoint>> contours = new List<List<MPoint>>();
-            //int val = engine.AdaptiveThreshold(brightness.grayValsInArray, brightness.Width, brightness.Height, ref thresholdData);
             int val = engine.SearchLights(brightness.grayValsInArray, brightness.Width, brightness.Height,ref contours);
-            txtThreshold.Text = val.ToString();
+            OperationToggleButtonPressed(Operation.none);
+            SetInfo(string.Format("阙值：{0}", val), false);
             myCanvas.SetContours(contours);
+        }
+
+        private void lstViewUGRSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (lstviewResult.SelectedIndex == -1)
+                return;
+            int polygonIndex = lstviewResult.SelectedIndex;
+            myCanvas.Select(polygonIndex);
+        }
+        private void btnCalculateGR_Click(object sender, RoutedEventArgs e)
+        {
+            if (myCanvas.Shapes.Count == 0)
+            {
+                SetInfo("未设置任何发光区域！", true);
+                return;
+            }
+
+            if(!myCanvas.PlayGround.Finished)
+            {
+                SetInfo("未设置广场区域！", true);
+                return;
+            }
+            SetInfo("正在计算，请稍候！", false);
+            myCanvas.SortPolygons();
+            this.Refresh();
+            OperationToggleButtonPressed(Operation.none); //reset
+            GlareLight glareLight = new GlareLight();
+            double GR = glareLight.CalculateGR(brightness.orgVals, myCanvas.Shapes, myCanvas.PlayGround);
+            txtGR.Text = GR.ToString("0.00");
+            SetInfo("", false);
         }
 
         private void btnCalculateTI_Click(object sender, RoutedEventArgs e)
@@ -109,23 +151,38 @@ namespace GlareCalculator
                 SetInfo("未设置任何发光区域！", true);
                 return;
             }
-            if(myCanvas.RoadPolygon == null)
+            if(!myCanvas.RoadPolygon.Finished)
             {
                 SetInfo("未设置任何路面！", true);
                 return;
             }
             SetInfo("正在计算，请稍候！", false);
             this.Refresh();
+            myCanvas.SortPolygons();
             OperationToggleButtonPressed(Operation.none); //reset
             GlareLight glareLight = new GlareLight();
             double Lv = 0;
             double Lave = 0;
-            double TI = glareLight.CalculateTI(brightness.orgVals, myCanvas.Shapes, myCanvas.RoadPolygon, ref Lv, ref Lave);
+            TIResult tiResult = null;
+            double TI = glareLight.CalculateTI(brightness.orgVals, myCanvas.Shapes, myCanvas.RoadPolygon,
+                ref Lv, ref Lave, ref tiResult);
             txtTI.Text = TI.ToString("0.00");
-            txtLv.Text = Lv.ToString("0.00");
             txtLave.Text = Lave.ToString("0.00");
-
+            
+            DataTable tbl = new DataTable("result");
+            tbl.Columns.Add("ID", typeof(string));
+            tbl.Columns.Add("Ul", typeof(string));
+            int ID = 1;
+            foreach (var Ul in tiResult.eachLane_UlList)
+            {
+                string sID = ID.ToString();
+                ID++;
+                tbl.Rows.Add(sID, Ul.ToString("0.00"));
+            }
+            lstviewTIResult.ItemsSource = tbl.DefaultView;
+            SetInfo("", false);
         }
+
         private void btnCalculateUGR_Click(object sender, RoutedEventArgs e)
         {
             if(myCanvas.Shapes.Count == 0)
@@ -139,6 +196,7 @@ namespace GlareCalculator
             GlareLight glareLight = new GlareLight();
             List<GlareResult> results = new List<GlareResult>();
             double LA = 0;
+            myCanvas.SortPolygons();
             var ugr = glareLight.CalculateUGR(brightness.orgVals, myCanvas.Shapes, ref results, ref LA);
 
             DataTable  tbl = new DataTable("result");
@@ -204,6 +262,7 @@ namespace GlareCalculator
             Save2File(bmpImage);
             myCanvas.Width = (int)bmpImage.Width;
             myCanvas.Height = (int)bmpImage.Height;
+            colorBar.Height = scrollViewer.Height;
             myCanvas.SetBkGroundImage(bmpImage);
         }
 
@@ -267,11 +326,16 @@ namespace GlareCalculator
             registInfo.ShowDialog();
         }
 
-
+        bool IsPolygon(Operation op)
+        {
+            return op == Operation.polygon ||
+                 op == Operation.road ||
+                 op == Operation.playground;
+        }
         private void OnComplete()
         {
             var curOp = GetCurrentOperation();
-            if (curOp != Operation.polygon && curOp != Operation.road)
+            if (!IsPolygon(curOp))
             {
                 SetInfo("当前操作对象不是多边形，无法闭合！", true);
                 return;
@@ -302,13 +366,18 @@ namespace GlareCalculator
             operation_ButtonControl.Add(Operation.select, btnSelect);
             operation_ButtonControl.Add(Operation.histogram, btnHistogram);
             operation_ButtonControl.Add(Operation.road, btnRoadDef);
+            operation_ButtonControl.Add(Operation.search, btnAutoFind);
+            operation_ButtonControl.Add(Operation.playground, btnSetPlayGround);
             return operation_ButtonControl;
         }
         private void OperationToggleButtonPressed(Operation op)
         {
-            List<Operation> operations = new List<Operation>(){
-                Operation.polygon,Operation.circle,Operation.select,Operation.fakeColor,Operation.histogram, Operation.road
-            };
+            List<Operation> operations = new List<Operation>();
+            foreach(var pair in operation_ButtonControl)
+            {
+                operations.Add(pair.Key);
+            }
+
             foreach(Operation tmpOp in operations)
             {
                 if (tmpOp == op)
@@ -323,6 +392,9 @@ namespace GlareCalculator
                 operation_ButtonControl[tmpOp].IsChecked = false;
             }
 
+            //process pseudoColor
+            DoWithPseudoColor();
+           
             int laneCnt = 1;
             int ptsPerLane = 5;
             if(op == Operation.road)
@@ -331,6 +403,31 @@ namespace GlareCalculator
                  ptsPerLane = int.Parse(txtPts.Text);
             }
             myCanvas.CreateNewShape(op,laneCnt,ptsPerLane);
+        }
+
+        private void DoWithPseudoColor()
+        {
+            bool isFakeColor = GetCurrentOperation() == Operation.fakeColor;
+            int columnSpan = isFakeColor ? 1 : 2;
+            Grid.SetColumnSpan(scrollViewer, columnSpan);
+            colorBar.SetMinMax(brightness.Min, brightness.Max);
+            colorBar.Visibility = isFakeColor ? Visibility.Visible : Visibility.Collapsed;
+            BitmapImage bmpImage;
+            if ((bool)btnFakeColor.IsChecked)
+            {
+                bmpImage = ImageHelper.CreateImage(brightness.pngFile);
+            }
+            else
+            {
+                bmpImage = ImageHelper.CreateImage(brightness.grayVals);
+            }
+            myCanvas.SetBkGroundImage(bmpImage);
+        }
+
+        private void btnSetPlayGround_Click(object sender, RoutedEventArgs e)
+        {
+            OperationToggleButtonPressed(Operation.playground);
+
         }
 
         private void btnHistogram_Click(object sender, RoutedEventArgs e)
@@ -372,21 +469,15 @@ namespace GlareCalculator
         private void btnFakeColor_Click(object sender, RoutedEventArgs e)
         {
             OperationToggleButtonPressed(Operation.fakeColor);
+            //rootGrid.SetRowSpan(scrollViewer, 2);
+            
             SwitchView();
-            BitmapImage bmpImage;
-            if ((bool)btnFakeColor.IsChecked)
-            {
-                bmpImage = ImageHelper.CreateImage(brightness.pngFile);
-            }
-            else
-            {
-                bmpImage = ImageHelper.CreateImage(brightness.grayVals);
-            }
-            myCanvas.SetBkGroundImage(bmpImage);
             
         }
         #endregion
-       
+
+     
+
     }
 
 

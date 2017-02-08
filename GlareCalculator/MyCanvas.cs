@@ -22,10 +22,11 @@ namespace GlareCalculator
         List<ShapeBase> shapes = new List<ShapeBase>();
         ShapeBase newShape = null;
         RoadPolygon roadPolygon = new RoadPolygon(1,1);
+        Polygon playGround = new Polygon();
         Point invalidPt = new Point(-1,-1);
         bool shouldBlow = false;
         public delegate void RoadFinished();
-        public event RoadFinished onRoadPolygonFinished;
+        public event RoadFinished onRoadPlayGroundFinished;
         private Timer timer = new Timer(500);
 
         public MyCanvas()
@@ -50,6 +51,14 @@ namespace GlareCalculator
             }
         }
 
+        public Polygon PlayGround
+        {
+            get
+            {
+                return playGround;
+            }
+        }
+
         public void SetContours(List<List<MPoint>> contours)
         {
             shapes.Clear();
@@ -58,7 +67,7 @@ namespace GlareCalculator
                 Polygon polygon = new Polygon(pts);
                 shapes.Add(polygon);
             }
-            NotifyRoadFinished();
+            NotifyRoadPlayGroundFinished();
             InvalidateVisual();
         }
 
@@ -95,8 +104,11 @@ namespace GlareCalculator
                 newShape.Render(drawingContext, shouldBlow);
             var grayBrush = Brushes.Gray;
             shapes.ForEach(x => x.Render(drawingContext, shouldBlow));
-            if(roadPolygon != null)
+            if(roadPolygon.Finished)
                 roadPolygon.Render(drawingContext, shouldBlow);
+            if (playGround.Finished)
+                playGround.Render(drawingContext, shouldBlow);
+
         }
 
 
@@ -151,7 +163,12 @@ namespace GlareCalculator
                 CheckIsValidRoad();
                 roadPolygon = (RoadPolygon)newShape;
                 roadPolygon.Normalize();
-                NotifyRoadFinished();
+                NotifyRoadPlayGroundFinished();
+            }
+            else if(CurrentOperation == Operation.playground)
+            {
+                playGround = (PlayGround)newShape;
+                NotifyRoadPlayGroundFinished();
             }
             else
             {
@@ -168,17 +185,27 @@ namespace GlareCalculator
                 throw new Exception("道路必须用梯形画出！");
         }
 
+
+        bool NoNeed2Draw()
+        {
+            return CurrentOperation != Operation.circle &&
+                CurrentOperation != Operation.polygon &&
+                CurrentOperation != Operation.road &&
+                CurrentOperation != Operation.playground;
+        }
         public void CreateNewShape(Operation operation, int lanes = 1, int ptsPerLane = 1)
         {
             CurrentOperation = operation;
             shapes.ForEach(x => x.Selected = false);
             InvalidateVisual();
             newShape = null;
-            if (operation != Operation.circle && operation != Operation.polygon && operation != Operation.road)
+            if (NoNeed2Draw())
                 return;
-            if(operation == Operation.polygon)
+            if (operation == Operation.polygon)
                 newShape = new Polygon();
-            else if(operation == Operation.road)
+            else if (operation == Operation.playground)
+                newShape = new PlayGround();
+            else if (operation == Operation.road)
             {
                 roadPolygon = null; //only allow one road
                 newShape = new RoadPolygon(lanes, ptsPerLane);
@@ -187,18 +214,16 @@ namespace GlareCalculator
                 newShape = new Circle();
         }
 
-        private void NotifyRoadFinished()
+        private void NotifyRoadPlayGroundFinished()
         {
-            if (onRoadPolygonFinished != null)
-                onRoadPolygonFinished();
+            if (onRoadPlayGroundFinished != null)
+                onRoadPlayGroundFinished();
         }
         
         internal void LeftMouseDown(Point pt)
         {
-            if (CurrentOperation != Operation.circle && CurrentOperation != Operation.polygon && CurrentOperation != Operation.road)
+            if (NoNeed2Draw())
                 return;
-
-           
             if (newShape.Finished)
                 return;
             newShape.OnLeftMouseDown(pt);
@@ -238,7 +263,7 @@ namespace GlareCalculator
             {
                 shapes.Add(newShape);
                 CreateNewShape(Operation.circle);
-                NotifyRoadFinished();
+                NotifyRoadPlayGroundFinished();
             }
             InvalidateVisual();
         }
@@ -266,7 +291,25 @@ namespace GlareCalculator
             }
         }
 
-       
+        internal void SortPolygons()
+        {
+            int ID = 1;
+            foreach(var shape in shapes)
+            {
+                shape.ID = ID.ToString();
+                ID++;
+            }
+        }
+
+        internal void Select(int polygonIndex)
+        {
+            foreach(var shape in shapes)
+            {
+                int ID = int.Parse(shape.ID);
+                shape.Selected = ID == polygonIndex + 1;
+            }
+            InvalidateVisual();
+        }
     }
 
    

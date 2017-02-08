@@ -96,6 +96,8 @@
     <Compile Include="AboutBox.Designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="ColorCanvas.cs" />
+    <Compile Include="ColorMap.cs" />
     <Compile Include="Configuration.xaml.cs">
       <DependentUpon>Configuration.xaml</DependentUpon>
     </Compile>
@@ -207,9 +209,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="images\search.png" />
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4 %28x86 和 x64%29</ProductName>
@@ -233,6 +232,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="images\road.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\search.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\playground.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

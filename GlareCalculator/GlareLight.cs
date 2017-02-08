@@ -49,22 +49,55 @@ namespace GlareCalculator
 
         public double CalculateTI(List<List<double>> vals,
             List<ShapeBase> shapes, RoadPolygon roadRegion,
-            ref double Lv,ref double Lave)
+            ref double Lv,ref double Lavg, ref TIResult tiResult)
         {
             Lv = GetLv(vals, shapes);
-            Lave = GetLave(vals, roadRegion);
-
-            return 65*Lv / Math.Pow(Lave,0.8);
+            double minLumination = 0;
+            Lavg = GetLaneAverage(vals, roadRegion,ref minLumination);
+            
+            double U0 = minLumination / Lavg;
+            tiResult = new TIResult(U0);
+            List<double> Ul_List = new List<double>();
+            foreach(var lanePts in roadRegion.eachLanePts)
+            {
+                List<double> luminationVals = new List<double>();
+                lanePts.ForEach(pt => luminationVals.Add(vals[(int)pt.Y][(int)pt.X]));
+                double min = luminationVals.Min();
+                double max = luminationVals.Max();
+                tiResult.eachLane_UlList.Add(min / max);
+            }
+            return 65*Lv / Math.Pow(Lavg,0.8);
         }
 
-        private double GetLave(List<List<double>> vals, RoadPolygon roadRegion)
+        internal double CalculateGR(List<List<double>> vals, List<ShapeBase> shapes, Polygon playGround)
+        {
+            double Lv = GetLv(vals, shapes);
+            var pts = playGround.GetPossiblePts();
+            int totalPtCnt = 0;
+            double totalLumiation = 0;
+            foreach(var pt in pts)
+            {
+                if(playGround.PtIsInside(pt))
+                {
+                    totalPtCnt++;
+                    int x = (int)pt.X;
+                    int y = (int)pt.Y;
+                    totalLumiation += vals[y][x];
+                }
+            }
+            double lve = 0.035 * totalLumiation / totalPtCnt;
+            return Math.Log10(Lv / Math.Pow(lve, 0.9)) * 24 + 27;
+        }
+
+
+        private double GetLaneAverage(List<List<double>> vals, RoadPolygon roadRegion, ref double minLumination)
         {
             var ptBottomRight = roadRegion.BottomRight;
             var ptBottomLeft = roadRegion.BottomLeft;
             double bottomWidth = ptBottomRight.X - ptBottomLeft.X;
             List<Point> candidates = roadRegion.GetPossiblePts();
             var sameYLists = candidates.GroupBy(pt => pt.Y).Select(group => group.ToList()).ToList();
-            
+            minLumination = 10000000;
             double totalArea = 0;
             double totalLv = 0;
             foreach(var sameYPts in sameYLists)
@@ -96,13 +129,15 @@ namespace GlareCalculator
                 blowRatio *= blowRatio;//^2
                 foreach(var pt in thisLineValidPts)
                 {
+                    var val = vals[(int)pt.Y][(int)pt.X];
+                    if (val < minLumination)
+                        minLumination = val;
                     totalLv += vals[(int)pt.Y][(int)pt.X] * blowRatio;
                 }
 
                 totalArea += sameYPts.Count * blowRatio;
             }
             return totalLv / totalArea;
-
         }
 
         
@@ -242,7 +277,11 @@ namespace GlareCalculator
             return totalVal / totalCnt;
         }
 
-        
+
+
+
+
+      
     }
 
     internal class GlareResult
@@ -255,6 +294,23 @@ namespace GlareCalculator
             this.La = La;
             this.ω = ω;
             this.P = P;
+        }
+    }
+
+    internal class TIResult
+    {
+        public double U0;
+        public List<double> eachLane_UlList;
+        public TIResult(double U0)
+        {
+            this.U0 = U0;
+            this.eachLane_UlList = new List<double>();
+        }
+
+        public TIResult(double U0, List<double> Ul_List)
+        {
+            this.U0 = U0;
+            this.eachLane_UlList = Ul_List;
         }
     }
 }

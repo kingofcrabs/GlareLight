@@ -1,17 +1,11 @@
 ﻿using EngineDll;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.IO;
+using System.Globalization;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Timers;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace GlareCalculator
 {
@@ -30,8 +24,7 @@ namespace GlareCalculator
        
         public bool Selected { get; set; }
         public bool Finished { get; set; }
-
-
+        public string ID { get; set; }
 
         public virtual void Render(DrawingContext drawingContext, bool shouldBlow)
         {
@@ -74,6 +67,7 @@ namespace GlareCalculator
             Selected = true;
             Radius = 0;
             Finished = false;
+            ID = "";
         }
 
         public override bool PtIsInside(Point pt)
@@ -146,9 +140,24 @@ namespace GlareCalculator
             Brush brush = Brushes.Blue;
             penWidth = Selected ? 2 : 1;
             drawingContext.DrawEllipse(null, new Pen(brush, penWidth), ptCircle, Radius, Radius);
+
+            FormattedText ft = new FormattedText(ID, CultureInfo.CurrentCulture,
+                          FlowDirection.LeftToRight, new Typeface("Arial"), 12, Brushes.Red);
+            drawingContext.DrawText(ft, ptCircle);
         }
     }
+    public class PlayGround : Polygon
+    {
+        public PlayGround():base()
+        {
 
+        }
+
+        public override void Render(DrawingContext drawingContext, bool shouldBlow)
+        {
+            RenderBoundary(drawingContext, shouldBlow, Brushes.Blue);
+        }
+    }
     public class RoadPolygon : Polygon
     {
         Point ptBottomLeft;
@@ -158,7 +167,7 @@ namespace GlareCalculator
         int laneCnt;
         int ptCnt;
         //double realH;
-        List<List<Point>> eachLanePts = new List<List<Point>>();
+        public List<List<Point>> eachLanePts = new List<List<Point>>();
         public Point BottomLeft { 
             get 
             {
@@ -200,7 +209,7 @@ namespace GlareCalculator
             pts.Add(ptTopRight);
             pts.Add(ptBottomRight);
             pts.Add(ptBottomLeft);
-
+            currentPt = ptTopLeft;
             //get realH
             double topWith = ptTopRight.X - ptTopLeft.X;
             double bottomWidth = ptBottomRight.X - ptBottomLeft.X;
@@ -215,7 +224,9 @@ namespace GlareCalculator
                 yIndex++;
                 realH += bottomWidth / currentWidth;
             }
-            double expectedDistance = realH / ptCnt;
+            if (ptCnt == 1)
+                throw new Exception("参考点数不能为1个！");
+            double expectedDistance = realH / (ptCnt-1);
 
             //calculate points
             double k1 = (ptBottomLeft.Y - ptTopLeft.Y) / (ptBottomLeft.X - ptTopLeft.X);
@@ -224,25 +235,37 @@ namespace GlareCalculator
             double totalDistance = 0;
             yIndex = 0;
             eachLanePts.Clear();
+            for (int i = 0; i < laneCnt; i++ )
+            {
+                eachLanePts.Add(new List<Point>());
+            }
+
+           
             for (int yPixel = (int)ptTopRight.Y; yPixel < (int)ptBottomRight.Y; yPixel++)
             {
                 double currentWidth = topWith + yIndex * eachStepWidthDiff;
                 yIndex++;
                 totalDistance += bottomWidth / currentWidth;
-                if (totalDistance > expectedDistance)
+               
+                if (totalDistance > expectedDistance ||
+                    yPixel == (int)ptTopRight.Y ||
+                    yPixel == (int)ptBottomRight.Y-1)
                 {
                     totalDistance = 0;
                     yPositions.Add(yPixel);
                     double xStart = ptTopLeft.X + yIndex / k1;
                     double xEnd = xStart + currentWidth;
                     List<Point> linePts = new List<Point>();
-                    linePts.Add(new Point(xStart, yPixel));
-                    linePts.Add(new Point(xEnd, yPixel));
-                    eachLanePts.Add(linePts);
+                    if (laneCnt == 1)
+                        throw new Exception("不支持一条车道！");
+                    double tmpDis = (xEnd - xStart) / (laneCnt - 1);
+                    for (int i = 0; i < laneCnt; i++)
+                    {
+                        eachLanePts[i].Add(new Point(xStart+i*tmpDis,yPixel));
+                    }
                 }
 
             }
-
         }
 
         public override void Render(DrawingContext drawingContext, bool shouldBlow)
@@ -255,9 +278,17 @@ namespace GlareCalculator
         {
             if (!Finished)
                 return;
+            
             foreach(var linePts in eachLanePts)
             {
-                drawingContext.DrawLine(new Pen(Brushes.Red, 1), linePts.First(), linePts.Last());
+                if (linePts.Count == 0)
+                    continue;
+                var firstPt = linePts.First();
+                var lastPt = linePts.Last();
+                drawingContext.DrawLine(new Pen(Brushes.Green, 1), firstPt, lastPt);
+
+                foreach(var pt in linePts)
+                    drawingContext.DrawEllipse(Brushes.Red,new Pen(Brushes.Red, 1),pt,1,1);
             }
         }
 
@@ -279,15 +310,19 @@ namespace GlareCalculator
             currentPt = invalidPt;
             Selected = true;
             Finished = false;
+            ID = ""; 
         }
 
+  
         public Polygon(List<MPoint> pts)
+            
         {
             this.pts = new List<Point>();
             pts.ForEach( p=>this.pts.Add(new Point(p.x,p.y)));
             currentPt = invalidPt;
             Selected = false;
             Finished = true;
+            ID = ""; 
             FindBoundary();
         }
 
@@ -401,10 +436,7 @@ namespace GlareCalculator
                 drawingContext.DrawEllipse(null, new Pen(Brushes.Red, 2), pts.Last(), radius, radius);
             }
 
-
-          
-            
-            int width = Selected ? 2 : 1;
+            int width = Selected ? 3 : 1;
             for (int i = 0; i < pts.Count; i++)
             {
                 Point ptStart;
@@ -427,12 +459,15 @@ namespace GlareCalculator
                 }
                 drawingContext.DrawLine(new Pen(brush, width), ptStart, ptEnd);
             }
+            FormattedText ft = new FormattedText(ID, CultureInfo.CurrentCulture, 
+                FlowDirection.LeftToRight,new Typeface("Arial"), 12, Brushes.Red);
+            drawingContext.DrawText(ft, pts[0]);
             if (currentPt != invalidPt && pts.Count != 0)
                 drawingContext.DrawLine(new Pen(brush, width), pts.Last(), currentPt);
         }
         public override void Render(DrawingContext drawingContext, bool shouldBlow)
         {
-            RenderBoundary(drawingContext, shouldBlow, Brushes.Green);
+            RenderBoundary(drawingContext, shouldBlow, Brushes.Red);
         }
     }
 
@@ -445,6 +480,8 @@ namespace GlareCalculator
         fakeColor,
         select,
         histogram,
-        road
+        road,
+        search,
+        playground
     };
 }

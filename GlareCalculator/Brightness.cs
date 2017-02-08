@@ -18,8 +18,14 @@ namespace GlareCalculator
         public int[] GrayLevelCounts = new int[256];
         public int Width { get; set; }
         public int Height { get; set; }
+
+        public double Max { get; set; }
+        public double Min { get; set; }
+
         public void Read(string sFile)
         {
+            Max = 0;
+            Min = 1000000;
             pngFile = sFile.Replace(".txt",".png");
             
             orgVals.Clear();
@@ -37,6 +43,7 @@ namespace GlareCalculator
             
                     if (String.IsNullOrEmpty(str))
                         break;
+
                     orgVals.Add(ParseLine(str));
                 }
                 Debug.WriteLine("Finished!");
@@ -117,7 +124,14 @@ namespace GlareCalculator
             foreach(var s in strs)
             {
                 if(s != "")
-                    vals.Add(Parse(s));
+                {
+                    double v = Parse(s);
+                    if (v > Max)
+                        Max = v;
+                    if (v < Min)
+                        Min = v;
+                    vals.Add(v);
+                }
             }
             return vals;
         }
