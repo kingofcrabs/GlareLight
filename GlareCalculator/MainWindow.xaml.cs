@@ -65,9 +65,11 @@ namespace GlareCalculator
 
         bool IsInvalidPt(Point pt)
         {
-            return pt.X > scrollViewer.ViewportWidth || pt.Y > scrollViewer.ViewportHeight;
-                
+            
+            return pt.X - scrollViewer.HorizontalOffset > scrollViewer.ViewportWidth 
+                || pt.Y - scrollViewer.VerticalOffset > scrollViewer.ViewportHeight;
         }
+
         void scrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             Point pt = e.GetPosition(myCanvas);
@@ -388,12 +390,8 @@ namespace GlareCalculator
                     }
                     continue;
                 }
-                    
                 operation_ButtonControl[tmpOp].IsChecked = false;
             }
-
-            //process pseudoColor
-            DoWithPseudoColor();
            
             int laneCnt = 1;
             int ptsPerLane = 5;
@@ -469,8 +467,7 @@ namespace GlareCalculator
         private void btnFakeColor_Click(object sender, RoutedEventArgs e)
         {
             OperationToggleButtonPressed(Operation.fakeColor);
-            //rootGrid.SetRowSpan(scrollViewer, 2);
-            
+            DoWithPseudoColor();//process pseudoColor
             SwitchView();
             
         }

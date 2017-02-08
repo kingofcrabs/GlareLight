@@ -436,6 +436,9 @@ namespace GlareCalculator
                 drawingContext.DrawEllipse(null, new Pen(Brushes.Red, 2), pts.Last(), radius, radius);
             }
 
+            if (pts.Count == 0)
+                return;
+
             int width = Selected ? 3 : 1;
             for (int i = 0; i < pts.Count; i++)
             {

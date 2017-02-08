@@ -73,7 +73,7 @@ namespace GlareCalculator
 
         public void SetBkGroundImage(BitmapImage bmpImage)
         {
-            shapes.Clear();
+            //shapes.Clear();
             ImageBrush imageBrush = new ImageBrush();
             imageBrush.ImageSource = bmpImage;
             this.Background = imageBrush;
@@ -104,9 +104,9 @@ namespace GlareCalculator
                 newShape.Render(drawingContext, shouldBlow);
             var grayBrush = Brushes.Gray;
             shapes.ForEach(x => x.Render(drawingContext, shouldBlow));
-            if(roadPolygon.Finished)
+            if (roadPolygon != null && roadPolygon.Finished)
                 roadPolygon.Render(drawingContext, shouldBlow);
-            if (playGround.Finished)
+            if (playGround != null &&　playGround.Finished)
                 playGround.Render(drawingContext, shouldBlow);
 
         }
@@ -204,7 +204,10 @@ namespace GlareCalculator
             if (operation == Operation.polygon)
                 newShape = new Polygon();
             else if (operation == Operation.playground)
+            {
+                playGround = null; //only allow one playground
                 newShape = new PlayGround();
+            }
             else if (operation == Operation.road)
             {
                 roadPolygon = null; //only allow one road
