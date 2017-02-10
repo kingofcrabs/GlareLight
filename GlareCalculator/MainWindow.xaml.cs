@@ -27,7 +27,10 @@ namespace GlareCalculator
         //List<ShapeBase> shapes = new List<ShapeBase>();
         Brightness brightness = new Brightness();
         HistogramModel viewModel;
+        Point scrollViewOffset;
+        Point middleWheelDownPt;
         EngineDll.IEngine engine = null;
+        readonly Point invalidPt = new Point(-1, -1);
         public MainWindow()
         {
             InitializeComponent();
@@ -40,17 +43,15 @@ namespace GlareCalculator
             grpShape.IsEnabled = false;
             engine = new EngineDll.IEngine();
         }
-        #region other events
-        void myCanvas_onRoadOrPlaygroundFinished()
-        {
-            OperationToggleButtonPressed(Operation.none);
-        }
+      
+      
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             License license = new License();
             string key = Utility.GetKeyString();
             bool bValid = license.CheckRegistCode(key);
+            
             GlobalVars.Instance.Registed = bValid;
             if (!bValid)
             {
@@ -61,12 +62,18 @@ namespace GlareCalculator
             scrollViewer.PreviewMouseLeftButtonUp += scrollViewer_PreviewMouseLeftButtonUp;
             scrollViewer.PreviewMouseLeftButtonDown += scrollViewer_PreviewMouseLeftButtonDown;
             scrollViewer.PreviewMouseMove += ScrollViewer_PreviewMouseMove;
+            
+            
         }
+      
+        #region scrollview
+     
 
+    
         bool IsInvalidPt(Point pt)
         {
-            
-            return pt.X - scrollViewer.HorizontalOffset > scrollViewer.ViewportWidth 
+
+            return pt.X - scrollViewer.HorizontalOffset > scrollViewer.ViewportWidth
                 || pt.Y - scrollViewer.VerticalOffset > scrollViewer.ViewportHeight;
         }
 
@@ -75,6 +82,8 @@ namespace GlareCalculator
             Point pt = e.GetPosition(myCanvas);
             if (IsInvalidPt(pt))
                 return;
+            if (GetCurrentOperation() == Operation.select) //save the original point
+                scrollViewOffset = pt;
             myCanvas.LeftMouseDown(pt);
         }
 
@@ -83,7 +92,14 @@ namespace GlareCalculator
             Point pt = e.GetPosition(myCanvas);
             if (IsInvalidPt(pt))
                 return;
-            myCanvas.LeftMouseMove(pt, GetCurrentOperation());
+
+            if (GetCurrentOperation() == Operation.select && scrollViewOffset.X != -1) //scroll the viewer
+            {
+                scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset - (pt.X - scrollViewOffset.X));
+                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - (pt.Y - scrollViewOffset.Y));
+            }
+            else
+                myCanvas.LeftMouseMove(pt, GetCurrentOperation());
         }
 
         void scrollViewer_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -91,11 +107,16 @@ namespace GlareCalculator
             Point pt = e.GetPosition(myCanvas);
             if (IsInvalidPt(pt))
                 return;
+            scrollViewOffset = invalidPt;
             myCanvas.LeftMouseUp(pt);
         }
         #endregion
 
         #region misc
+        void myCanvas_onRoadOrPlaygroundFinished()
+        {
+            OperationToggleButtonPressed(Operation.none);
+        }
         private void SetInfo(string str, bool error)
         {
             Brush brush = error ? Brushes.Red : Brushes.Black;
@@ -115,6 +136,15 @@ namespace GlareCalculator
             SetInfo(string.Format("阙值：{0}", val), false);
             myCanvas.SetContours(contours);
         }
+
+        private void lstViewTISelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (lstviewTIResult.SelectedIndex == -1)
+                return;
+            int polygonIndex = lstviewTIResult.SelectedIndex;
+            myCanvas.Select(polygonIndex);
+        }
+
 
         private void lstViewUGRSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
@@ -163,13 +193,13 @@ namespace GlareCalculator
             myCanvas.SortPolygons();
             OperationToggleButtonPressed(Operation.none); //reset
             GlareLight glareLight = new GlareLight();
-            double Lv = 0;
+            double U0 = 0;
             double Lave = 0;
             TIResult tiResult = null;
             double TI = glareLight.CalculateTI(brightness.orgVals, myCanvas.Shapes, myCanvas.RoadPolygon,
-                ref Lv, ref Lave, ref tiResult);
+                ref U0, ref Lave, ref tiResult);
             txtTI.Text = TI.ToString("0.00");
-            txtLave.Text = Lave.ToString("0.00");
+            txtU0.Text = U0.ToString("0.00");
             
             DataTable tbl = new DataTable("result");
             tbl.Columns.Add("ID", typeof(string));
@@ -260,12 +290,23 @@ namespace GlareCalculator
             tabs.IsEnabled = true;
             grpShape.IsEnabled = true;
             viewModel.Histogram = new List<GrayInfo>();
+            InitUI();
+           
+        }
+
+        private void InitUI()
+        {
+            OperationToggleButtonPressed(Operation.none);
             BitmapImage bmpImage = ImageHelper.CreateImage(brightness.grayVals);
             Save2File(bmpImage);
             myCanvas.Width = (int)bmpImage.Width;
             myCanvas.Height = (int)bmpImage.Height;
             colorBar.Height = scrollViewer.Height;
             myCanvas.SetBkGroundImage(bmpImage);
+            myCanvas.Shapes.Clear();
+            lstviewResult.ItemsSource = null;
+            lstviewTIResult.ItemsSource = null;
+            txtGR.Text = txtTI.Text = txtUGR.Text = txtU0.Text = "";
         }
 
         private void Save2File(BitmapImage bmpImage)
@@ -392,6 +433,13 @@ namespace GlareCalculator
                 }
                 operation_ButtonControl[tmpOp].IsChecked = false;
             }
+
+            //hide or show fake color
+            bool isFakeColor = GetCurrentOperation() == Operation.fakeColor;
+            int columnSpan = isFakeColor ? 1 : 2;
+            Grid.SetColumnSpan(scrollViewer, columnSpan);
+            colorBar.SetMinMax(brightness.Min, brightness.Max);
+            colorBar.Visibility = isFakeColor ? Visibility.Visible : Visibility.Collapsed;
            
             int laneCnt = 1;
             int ptsPerLane = 5;
@@ -403,13 +451,9 @@ namespace GlareCalculator
             myCanvas.CreateNewShape(op,laneCnt,ptsPerLane);
         }
 
-        private void DoWithPseudoColor()
+      
+        private void PseudoOrGrayColor()
         {
-            bool isFakeColor = GetCurrentOperation() == Operation.fakeColor;
-            int columnSpan = isFakeColor ? 1 : 2;
-            Grid.SetColumnSpan(scrollViewer, columnSpan);
-            colorBar.SetMinMax(brightness.Min, brightness.Max);
-            colorBar.Visibility = isFakeColor ? Visibility.Visible : Visibility.Collapsed;
             BitmapImage bmpImage;
             if ((bool)btnFakeColor.IsChecked)
             {
@@ -467,12 +511,13 @@ namespace GlareCalculator
         private void btnFakeColor_Click(object sender, RoutedEventArgs e)
         {
             OperationToggleButtonPressed(Operation.fakeColor);
-            DoWithPseudoColor();//process pseudoColor
+            PseudoOrGrayColor();//process pseudoColor
             SwitchView();
             
         }
         #endregion
 
+      
      
 
     }

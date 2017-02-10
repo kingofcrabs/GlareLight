@@ -232,6 +232,7 @@ namespace GlareCalculator
             newShape.OnLeftMouseDown(pt);
             InvalidateVisual();
         }
+      
 
         private void SelectShape(Point pt)
         {
@@ -313,6 +314,8 @@ namespace GlareCalculator
             }
             InvalidateVisual();
         }
+
+        
     }
 
    

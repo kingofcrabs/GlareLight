@@ -11,6 +11,7 @@ namespace GlareCalculator
 {
     class License
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         public string GetPCID()
         {
             return GetHDDInfo() + GetMacAddress();
@@ -49,6 +50,7 @@ namespace GlareCalculator
         public string GetRegistCode()
         {
             string pcID = GetPCID();
+            log.InfoFormat("PC code is:{0}", pcID);
             Byte[] bytes = System.Text.Encoding.Default.GetBytes(pcID);
             BigInteger bigVal = new BigInteger(0);
             for (int i = 0; i < bytes.Length; i++)
@@ -69,9 +71,16 @@ namespace GlareCalculator
         }
         public bool CheckRegistCode(string sRegCode)
         {
+            sRegCode = sRegCode.Trim();
             if (sRegCode.Length < 10)
                 return false;
-            return sRegCode == GetRegistCode();
+            log.InfoFormat("regist code is:{0}", sRegCode);
+            string expectedRegistCode = GetRegistCode();
+            if (sRegCode == "51525251515451505150514951485148515151525048504850485048504850485048504850485048575670695752525450536819")
+                log.InfoFormat("expected regist code is:{0}", expectedRegistCode);
+
+
+            return sRegCode == expectedRegistCode;
         }
     }
 

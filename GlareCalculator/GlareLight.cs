@@ -49,13 +49,13 @@ namespace GlareCalculator
 
         public double CalculateTI(List<List<double>> vals,
             List<ShapeBase> shapes, RoadPolygon roadRegion,
-            ref double Lv,ref double Lavg, ref TIResult tiResult)
+            ref double U0,ref double Lavg, ref TIResult tiResult)
         {
-            Lv = GetLv(vals, shapes);
+            double Lv = GetLv(vals, shapes);
             double minLumination = 0;
             Lavg = GetLaneAverage(vals, roadRegion,ref minLumination);
             
-            double U0 = minLumination / Lavg;
+            U0 = minLumination / Lavg;
             tiResult = new TIResult(U0);
             List<double> Ul_List = new List<double>();
             foreach(var lanePts in roadRegion.eachLanePts)
@@ -71,7 +71,7 @@ namespace GlareCalculator
 
         internal double CalculateGR(List<List<double>> vals, List<ShapeBase> shapes, Polygon playGround)
         {
-            double Lv = GetLv(vals, shapes);
+            double Lv = 10*GetLv(vals, shapes);
             var pts = playGround.GetPossiblePts();
             int totalPtCnt = 0;
             double totalLumiation = 0;

@@ -215,8 +215,8 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0"/>
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                        <Label>平均亮度:</Label>
-                        <TextBox Width="100" IsEnabled="False" Name="txtLave"></TextBox>
+                        <Label>U0:</Label>
+                        <TextBox Width="100" IsEnabled="False" Name="txtU0"></TextBox>
                     </StackPanel>
                     <StackPanel>
                         <Grid Name="tiResultGrid" Margin="0,5,0,0">
@@ -227,7 +227,7 @@
                             <Label>区域信息：</Label>
                             <ScrollViewer x:Name="scrollViewerTIResult" Grid.Row="1" VerticalScrollBarVisibility="Auto"
                    HorizontalScrollBarVisibility="Auto" VerticalAlignment="Top" >
-                                <ListView Name="lstviewTIResult"  FontFamily="SimSun" >
+                                <ListView Name="lstviewTIResult" SelectionChanged="lstViewTISelectionChanged"  FontFamily="SimSun" >
                                     <ListView.View>
                                         <GridView x:Name="gridViewTI">
                                             <GridViewColumn Header="Lane" Width="30" DisplayMemberBinding="{Binding Path=ID}"></GridViewColumn>
