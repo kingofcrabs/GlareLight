@@ -193,6 +193,20 @@ namespace GlareCalculator
                 CurrentOperation != Operation.road &&
                 CurrentOperation != Operation.playground;
         }
+
+
+        public void CreateBoundingPolygon()
+        {
+            List<MPoint> pts = new List<MPoint>();
+            shapes.Clear();
+            pts.Add(new MPoint(1, 1));
+            pts.Add(new MPoint(1, (int)this.ActualHeight-1));
+            pts.Add(new MPoint((int)(this.ActualWidth-1), (int)(this.ActualHeight-1)));
+            pts.Add(new MPoint((int)(this.ActualWidth-1), 1));
+            newShape = new Polygon(pts);
+            CompletePolygon();
+        
+        }
         public void CreateNewShape(Operation operation, int lanes = 1, int ptsPerLane = 1)
         {
             CurrentOperation = operation;
@@ -201,20 +215,24 @@ namespace GlareCalculator
             newShape = null;
             if (NoNeed2Draw())
                 return;
-            if (operation == Operation.polygon)
-                newShape = new Polygon();
-            else if (operation == Operation.playground)
+
+            switch(operation)
             {
-                playGround = null; //only allow one playground
-                newShape = new PlayGround();
+                case Operation.polygon:
+                    newShape = new Polygon();
+                    break;
+                case Operation.playground:
+                     playGround = null; //only allow one playground
+                    newShape = new PlayGround();
+                    break;
+                case Operation.road:
+                    roadPolygon = null; //only allow one road
+                    newShape = new RoadPolygon(lanes, ptsPerLane);
+                    break;
+                default:
+                    newShape = new Circle();
+                    break;
             }
-            else if (operation == Operation.road)
-            {
-                roadPolygon = null; //only allow one road
-                newShape = new RoadPolygon(lanes, ptsPerLane);
-            }
-            else
-                newShape = new Circle();
         }
 
         private void NotifyRoadPlayGroundFinished()

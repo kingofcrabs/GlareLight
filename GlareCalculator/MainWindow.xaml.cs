@@ -28,9 +28,9 @@ namespace GlareCalculator
         Brightness brightness = new Brightness();
         HistogramModel viewModel;
         Point scrollViewOffset;
-        Point middleWheelDownPt;
         EngineDll.IEngine engine = null;
         readonly Point invalidPt = new Point(-1, -1);
+        double ratio = 1.0;
         public MainWindow()
         {
             InitializeComponent();
@@ -39,12 +39,9 @@ namespace GlareCalculator
             InitToggleOperationDict();
             viewModel = new ViewModels.HistogramModel();
             DataContext = viewModel;
-            
             grpShape.IsEnabled = false;
             engine = new EngineDll.IEngine();
         }
-      
-      
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -340,6 +337,36 @@ namespace GlareCalculator
             e.CanExecute = true;
         }
 
+        private void ZoomIn_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ratio *= 1.2;
+            Zoom(ratio);
+        }
+
+        private void Zoom(double ratio)
+        {
+            ScaleTransform scaler = new ScaleTransform(ratio, ratio);
+            grid.LayoutTransform = scaler;
+        }
+
+        private void ZoomIn_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+
+        private void ZoomOut_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ratio /= 1.2;
+            Zoom(ratio);
+        }
+
+        private void ZoomOut_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+
         private void OnDelete_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             var currentOperation = GetCurrentOperation();
@@ -350,6 +377,16 @@ namespace GlareCalculator
             if (!validOperations.Contains(currentOperation))
                 return;
             myCanvas.OnDelete();
+        }
+
+        private void CreateBoundPolygon_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void CreateBoundPolygon_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            myCanvas.CreateBoundingPolygon();
         }
 
         private void CompletePolygon_CanExecute(object sender, CanExecuteRoutedEventArgs e)

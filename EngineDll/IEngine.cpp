@@ -53,25 +53,6 @@ namespace EngineDll
 		m_EngineImpl->Convert2PesudoColor(nativeSourceFileName, nativeDestFileName);
 	}
 
-	/*void IEngine::FindContours(array<uchar>^ arr, int width, int height, int cnt2Find)
-	{
-		pin_ptr<uchar> pin = &arr[0];
-		uchar * pData = pin;
-		std::vector<std::vector<cv::Point>> contours;
-			
-		m_EngineImpl->FindContoursRaw(pData, width, height, contours, 100, 1000, 3);
-	}*/
-
-	/*int IEngine::AdaptiveThreshold(array<uchar>^ src, int width, int height, List<uchar>^% afterThresholdData)
-	{
-		pin_ptr<uchar> pin = &src[0];
-		uchar * pData = pin;
-		std::vector<uchar> afterThresholdDataInVec;
-		int val = m_EngineImpl->AdaptiveThreshold(pData, width,height, afterThresholdDataInVec);
-		afterThresholdData = Copy2List(afterThresholdDataInVec);
-		return val;
-	}*/
-
 	int IEngine::SearchLights(array<uchar>^ src, int width, int height, List<List<MPoint^>^>^% contours)
 	{
 		pin_ptr<uchar> pin = &src[0];

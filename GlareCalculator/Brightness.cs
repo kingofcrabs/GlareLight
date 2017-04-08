@@ -29,12 +29,39 @@ namespace GlareCalculator
             pngFile = sFile.Replace(".txt",".png");
             
             orgVals.Clear();
+            int width = 0;
+            int height = 0;
+            bool xyMode = true;
             using (StreamReader sr = new StreamReader(sFile))
             {
                 int lineNum = 1;
                 while (true)
                 {
                     string str = sr.ReadLine();
+
+                    if(lineNum == 3)//get x
+                    {
+                        width = GetNum(str);
+                        xyMode = str.Contains("nx");
+                       
+                    }
+
+                    if(lineNum == 4)//get y
+                    {
+                        height = GetNum(str);
+                        if (!xyMode)
+                        {
+                            for (int y = 0; y < height; y++)
+                            {
+                                List<double> oneRowVals = new List<double>(width);
+                                for (int x = 0; x < width; x++)
+                                {
+                                    oneRowVals.Add(0);
+                                }
+                                orgVals.Add(oneRowVals);
+                            }
+                        }
+                    }
                     if (lineNum <= 8)
                     {
                         lineNum++;
@@ -44,11 +71,35 @@ namespace GlareCalculator
                     if (String.IsNullOrEmpty(str))
                         break;
 
-                    orgVals.Add(ParseLine(str));
+                    if(xyMode)
+                        orgVals.Add(ParseLine(str));
+                    else
+                    {
+                        ParseOneVal(orgVals, str);
+                    }
                 }
                 Debug.WriteLine("Finished!");
             }
             grayVals =  Convert2Gray(orgVals);
+        }
+
+        private void ParseOneVal(List<List<double>> orgVals, string content)
+        {
+            string[] strs = content.Split('\t');
+            int y = int.Parse(strs[0]);
+            int x = int.Parse(strs[1]);
+            orgVals[y][x] = double.Parse(strs[2]);
+        }
+
+        private int GetNum(string str)
+        {
+            string chStr = "";
+            foreach(var ch in str)
+            {
+                if (Char.IsDigit(ch))
+                    chStr += ch;
+            }
+            return int.Parse(chStr);
         }
 
         

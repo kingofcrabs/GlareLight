@@ -19,10 +19,16 @@
        
         <RoutedUICommand x:Key="DeleteShape" Text="Delete." />
         <RoutedUICommand x:Key="CompletePolygon" Text="Finish Editing the polygon." />
+        <RoutedUICommand x:Key="CreateBoundPolygon" Text="Create bouding polygon." />
+        <RoutedUICommand x:Key="ZoomIn" Text="Zoom in." />
+        <RoutedUICommand x:Key="ZoomOut" Text="Zoom out." />
     </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Key="Delete" Command="{StaticResource DeleteShape}"/>
         <KeyBinding Modifiers="Ctrl" Key="P" Command="{StaticResource CompletePolygon}"/>
+        <KeyBinding Modifiers="Ctrl" Key="A" Command="{StaticResource CreateBoundPolygon}"/>
+        <KeyBinding Modifiers="Ctrl" Key="B" Command="{StaticResource ZoomIn}"/>
+        <KeyBinding Modifiers="Ctrl" Key="S" Command="{StaticResource ZoomOut}"/>
     </Window.InputBindings>
     <Window.CommandBindings>
         <CommandBinding Command="{StaticResource DeleteShape}"
@@ -36,6 +42,18 @@
         <CommandBinding Command="{StaticResource CompletePolygon}"
                     CanExecute="CompletePolygon_CanExecute"
                     Executed="CompletePolygon_Executed"/>
+
+        <CommandBinding Command="{StaticResource CreateBoundPolygon}"
+                    CanExecute="CreateBoundPolygon_CanExecute"
+                    Executed="CreateBoundPolygon_Executed"/>
+
+        <CommandBinding Command="{StaticResource ZoomIn}"
+                    CanExecute="ZoomIn_CanExecute"
+                    Executed="ZoomIn_Executed"/>
+
+        <CommandBinding Command="{StaticResource ZoomOut}"
+                    CanExecute="ZoomOut_CanExecute"
+                    Executed="ZoomOut_Executed"/>
 
         <CommandBinding Command="Help" Executed="CommandHelp_Executed" CanExecute="CommandHelp_CanExecute"/>
     </Window.CommandBindings>
@@ -256,7 +274,7 @@
         </TabControl>
        
 
-        <Grid Grid.Row="2" Grid.Column="1" Grid.RowSpan="2"   >
+        <Grid Grid.Row="2" Name="grid" Grid.Column="1" Grid.RowSpan="2"   >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition Width="60"></ColumnDefinition>
