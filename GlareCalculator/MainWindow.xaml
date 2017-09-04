@@ -27,8 +27,8 @@
         <KeyBinding Key="Delete" Command="{StaticResource DeleteShape}"/>
         <KeyBinding Modifiers="Ctrl" Key="P" Command="{StaticResource CompletePolygon}"/>
         <KeyBinding Modifiers="Ctrl" Key="A" Command="{StaticResource CreateBoundPolygon}"/>
-        <KeyBinding Modifiers="Ctrl" Key="B" Command="{StaticResource ZoomIn}"/>
-        <KeyBinding Modifiers="Ctrl" Key="S" Command="{StaticResource ZoomOut}"/>
+        <KeyBinding Modifiers="Ctrl" Key="OemPlus" Command="{StaticResource ZoomIn}"/>
+        <KeyBinding Modifiers="Ctrl" Key="OemMinus" Command="{StaticResource ZoomOut}"/>
     </Window.InputBindings>
     <Window.CommandBindings>
         <CommandBinding Command="{StaticResource DeleteShape}"

@@ -15,8 +15,10 @@
             <StackPanel Margin="1,5,0,0" Orientation="Horizontal">
                 <Label>镜头类型：</Label>
                 <ComboBox Name="cmbLen" Width="60">
-                    <ComboBoxItem IsSelected="True">8mm</ComboBoxItem>
                     <ComboBoxItem>6mm</ComboBoxItem>
+                    <ComboBoxItem IsSelected="True">8mm</ComboBoxItem>
+                    <ComboBoxItem>20mm</ComboBoxItem>
+                    <ComboBoxItem>24mm</ComboBoxItem>
                 </ComboBox>
 
             </StackPanel>

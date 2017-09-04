@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace GlareCalculator
 {
@@ -15,14 +16,26 @@ namespace GlareCalculator
 
         void Configuration_Loaded(object sender, RoutedEventArgs e)
         {
-            cmbLen.SelectedIndex = GlobalVars.Instance.UserSettings.Focus == 6 ? 0 : 1;
+            cmbLen.SelectedIndex =  1;
+            string wantedContent = string.Format("{0}mm",GlobalVars.Instance.UserSettings.Focus);
+            foreach(ComboBoxItem item in cmbLen.Items)
+            {
+                string curItem = item.Content.ToString();
+                if (curItem == wantedContent)
+                {
+                    cmbLen.SelectedItem = item;
+                    break;
+                }
+
+            }
+            
             cmbPixel.SelectedIndex = GlobalVars.Instance.UserSettings.PixelLength == 2.2 ? 0 : 1;
             txtAge.Text = GlobalVars.Instance.UserSettings.Age.ToString();
         }
 
         private void btnOk_Click(object sender, RoutedEventArgs e)
         {
-            int len = cmbLen.SelectedIndex == 0 ? 6 : 8;
+            int len = int.Parse(cmbLen.Text.Replace("mm", ""));
             double pixel = cmbPixel.SelectedIndex == 0? 2.2 : 5.5;
             int age = int.Parse(txtAge.Text);
 

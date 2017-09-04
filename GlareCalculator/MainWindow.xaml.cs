@@ -2,6 +2,7 @@
 using GlareCalculator.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Globalization;
 using System.Windows;
@@ -45,20 +46,27 @@ namespace GlareCalculator
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            License license = new License();
-            string key = Utility.GetKeyString();
-            bool bValid = license.CheckRegistCode(key);
-            
-            GlobalVars.Instance.Registed = bValid;
-            if (!bValid)
+            try
             {
-                this.Title = "软件未注册！";
+                License license = new License();
+                string key = Utility.GetKeyString();
+                bool bValid = license.CheckRegistCode(key);
+
+                GlobalVars.Instance.Registed = bValid;
+                if (!bValid)
+                {
+                    this.Title = "软件未注册！";
+                }
+                tabs.IsEnabled = false;
+                myCanvas.IsHitTestVisible = false;
+                scrollViewer.PreviewMouseLeftButtonUp += scrollViewer_PreviewMouseLeftButtonUp;
+                scrollViewer.PreviewMouseLeftButtonDown += scrollViewer_PreviewMouseLeftButtonDown;
+                scrollViewer.PreviewMouseMove += ScrollViewer_PreviewMouseMove;
             }
-            tabs.IsEnabled = false;
-            myCanvas.IsHitTestVisible = false;
-            scrollViewer.PreviewMouseLeftButtonUp += scrollViewer_PreviewMouseLeftButtonUp;
-            scrollViewer.PreviewMouseLeftButtonDown += scrollViewer_PreviewMouseLeftButtonDown;
-            scrollViewer.PreviewMouseMove += ScrollViewer_PreviewMouseMove;
+            catch(Exception ex)
+            {
+                SetInfo(ex.Message, true);
+            }
             
             
         }
@@ -288,7 +296,6 @@ namespace GlareCalculator
             grpShape.IsEnabled = true;
             viewModel.Histogram = new List<GrayInfo>();
             InitUI();
-           
         }
 
         private void InitUI()

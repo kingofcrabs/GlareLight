@@ -29,9 +29,12 @@ namespace GlareCalculator
 
         private string GetMacAddress()
         {
+
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_NetworkAdapterConfiguration where IPEnabled=true");
             IEnumerable<ManagementObject> objects = searcher.Get().Cast<ManagementObject>();
             string mac = (from o in objects orderby o["IPConnectionMetric"] select o["MACAddress"].ToString()).FirstOrDefault();
+            if (mac == null)
+                throw new Exception("Cannot get pc ID");
             mac = mac.Replace(":", "");
             return mac;
         }
@@ -76,10 +79,6 @@ namespace GlareCalculator
                 return false;
             log.InfoFormat("regist code is:{0}", sRegCode);
             string expectedRegistCode = GetRegistCode();
-            if (sRegCode == "51525251515451505150514951485148515151525048504850485048504850485048504850485048575670695752525450536819")
-                log.InfoFormat("expected regist code is:{0}", expectedRegistCode);
-
-
             return sRegCode == expectedRegistCode;
         }
     }
