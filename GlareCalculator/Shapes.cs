@@ -80,15 +80,19 @@ namespace GlareCalculator
 
         public override List<Point> GetPossiblePts()
         {
-            int startX = (int)Math.Floor(ptCircle.X);
-            int startY = (int)Math.Floor(ptCircle.Y);
+            int startX = (int)Math.Floor(ptCircle.X - Radius);
+            int startY = (int)Math.Floor(ptCircle.Y - Radius);
             int endX =  (int)Math.Ceiling(ptCircle.X + Radius);
             int endY = (int)Math.Ceiling(ptCircle.Y + Radius);
             List<Point> pts = new List<Point>();
             for(int x = startX; x < endX; x++)
             {
                 for (int y = startY; y < endY; y++)
-                    pts.Add(new Point(x, y));
+                {
+                    if( GetDistance(new Point(x,y),ptCircle) <= Radius)
+                        pts.Add(new Point(x, y));
+                }
+                    
             }
             return pts;
         }

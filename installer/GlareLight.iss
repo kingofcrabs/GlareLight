@@ -1,7 +1,7 @@
 #define use_dotnetfx40
 
 #define MyAppSetupName 'GlareCalculator'
-#define MyAppVersion '0.05'
+#define MyAppVersion '0.06'
 
 [Setup]
 AppName={#MyAppSetupName}

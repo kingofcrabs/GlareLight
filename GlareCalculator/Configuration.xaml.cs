@@ -26,7 +26,6 @@ namespace GlareCalculator
                     cmbLen.SelectedItem = item;
                     break;
                 }
-
             }
             
             cmbPixel.SelectedIndex = GlobalVars.Instance.UserSettings.PixelLength == 2.2 ? 0 : 1;

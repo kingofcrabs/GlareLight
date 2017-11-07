@@ -88,6 +88,11 @@ namespace GlareCalculator
             string[] strs = content.Split('\t');
             int y = int.Parse(strs[0]);
             int x = int.Parse(strs[1]);
+            if (y < 5)
+            {
+                orgVals[y][x] = 0;
+                return;
+            }
             orgVals[y][x] = double.Parse(strs[2]);
         }
 

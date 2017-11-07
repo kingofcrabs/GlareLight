@@ -52,11 +52,12 @@ namespace GlareCalculator
                 string key = Utility.GetKeyString();
                 bool bValid = license.CheckRegistCode(key);
 
-                GlobalVars.Instance.Registed = bValid;
-                if (!bValid)
-                {
-                    this.Title = "软件未注册！";
-                }
+                GlobalVars.Instance.Registed = true;//bValid;
+                //if (!bValid)
+                //{
+                //    this.Title = "软件未注册！";
+                //}
+                this.Title = "测试版";
                 tabs.IsEnabled = false;
                 myCanvas.IsHitTestVisible = false;
                 scrollViewer.PreviewMouseLeftButtonUp += scrollViewer_PreviewMouseLeftButtonUp;
@@ -120,7 +121,7 @@ namespace GlareCalculator
         #region misc
         void myCanvas_onRoadOrPlaygroundFinished()
         {
-            OperationToggleButtonPressed(Operation.none);
+            //OperationToggleButtonPressed(Operation.none);
         }
         private void SetInfo(string str, bool error)
         {

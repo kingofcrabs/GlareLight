@@ -20,7 +20,7 @@ namespace GlareCalculator
             f = GlobalVars.Instance.UserSettings.Focus / 1000.0; //mm
             List<Point> insidePolygonPts = new List<Point>();
             Dictionary<ShapeBase, List<Point>> eachShape_pts = GetPtsInShapes(vals, shapes);
-            LA = Average(vals);
+            Lb = Average(vals); //backgroud average value
             double sum = 0;
             foreach(var pair in eachShape_pts)
             {
@@ -30,21 +30,30 @@ namespace GlareCalculator
                 double totalOmega = 0;
                 double totalP = 0;
                 double totalLa = 0;
-                foreach(Point pt in pts)
+                double La = 0; //average value in region
+                List<double> lst_ω = new List<double>();
+                List<double> lst_p = new List<double>();
+                foreach (Point pt in pts)
                 {
                     double L_si = vals[(int)pt.Y][(int)pt.X];
-                    
                     double ω = 0;
                     double p = 0;
                     CalculateOmegaAndGuth(vals, (int)pt.X, (int)pt.Y, ref ω, ref p);
+                    lst_ω.Add(ω);
+                    lst_p.Add(p);
                     totalOmega += ω;
                     totalP += p;
                     totalLa += L_si;
-                    sum += ω * L_si * L_si / (p * p);
+                }
+                //foreach(Point pt in pts)
+                La = totalLa / pts.Count;
+                for (int i = 0; i < pts.Count; i++ )
+                {
+                    sum += lst_ω[i] * La * La / (lst_p[i] * lst_p[i]);
                 }
                 results.Add(new GlareResult(totalLa / pts.Count, totalOmega, totalP / pts.Count));
             }
-            return 8 * Math.Log(0.25 * sum / LA);
+            return 8 * Math.Log(0.25 * sum / Lb);
         }
 
         public double CalculateTI(List<List<double>> vals,
@@ -281,7 +290,9 @@ namespace GlareCalculator
 
 
 
-      
+
+
+        public double Lb { get; set; }
     }
 
     internal class GlareResult
